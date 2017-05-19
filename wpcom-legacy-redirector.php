@@ -52,10 +52,11 @@ class WPCOM_Legacy_Redirector {
 			return;
 		}
 
-		$url = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		$url = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 
-		if ( ! empty( $_SERVER['QUERY_STRING'] ) )
+		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 			$url .= '?' . $_SERVER['QUERY_STRING'];
+		}
 
 		$request_path = apply_filters( 'wpcom_legacy_redirector_request_path', $url );
 
@@ -102,7 +103,7 @@ class WPCOM_Legacy_Redirector {
 
 		if ( is_numeric( $redirect_to ) ) {
 			$args['post_parent'] = $redirect_to;
-		} elseif ( false !== parse_url( $redirect_to ) ) {
+		} elseif ( false !== wp_parse_url( $redirect_to ) ) {
 			$args['post_excerpt'] = esc_url_raw( $redirect_to );
 		} else {
 			return new WP_Error( 'invalid-redirect-url', 'Invalid redirect_to param; should be a post_id or a URL' );
@@ -173,7 +174,15 @@ class WPCOM_Legacy_Redirector {
 
 		$url_hash = self::get_url_hash( $url );
 
-		$redirect_post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash ) );
+		// Allow plugins to disable lowercase.
+		if ( apply_filters( 'wpcom_legacy_redirector_check_lowercase', true ) ) {
+			$lowercase_url_hash = self::get_url_hash( self::lowercase( $url ) );
+			$select_query       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND (post_name = %s OR post_name = %s) LIMIT 1", self::POST_TYPE, $url_hash, $lowercase_url_hash );
+		} else {
+			$select_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash );
+		}
+
+		$redirect_post_id = $wpdb->get_var( $select_query );
 
 		if ( ! $redirect_post_id ) {
 			$redirect_post_id = 0;
@@ -231,6 +240,15 @@ class WPCOM_Legacy_Redirector {
 
 		return $normalised_url;
 
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function lowercase( $string ) {
+		return ! empty( $string ) ? strtolower( $string ) : $string;
 	}
 }
 
