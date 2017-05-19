@@ -8,7 +8,7 @@
  * Author URI: https://vip.wordpress.com
  *
  * This is a no-frills plugin (no UI, for example). Data entry needs to be bulk-loaded via the wp-cli commands provided or custom scripts.
- * 
+ *
  * Redirects are stored as a custom post type and use the following fields:
  *
  * - post_name for the md5 hash of the "from" path or URL.
@@ -37,7 +37,7 @@ class WPCOM_Legacy_Redirector {
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
 	}
-	
+
 	static function init() {
 		register_post_type( self::POST_TYPE, array(
 			'public' => false,
@@ -47,13 +47,15 @@ class WPCOM_Legacy_Redirector {
 	static function maybe_do_redirect() {
 		// Avoid the overhead of running this on every single pageload.
 		// We move the overhead to the 404 page but the trade-off for site performance is worth it.
-		if ( ! is_404() )
+		if ( ! is_404() ) {
 			return;
+		}
 
-		$url = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		$url = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 
-		if ( ! empty( $_SERVER['QUERY_STRING'] ) )
+		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 			$url .= '?' . $_SERVER['QUERY_STRING'];
+		}
 
 		$request_path = apply_filters( 'wpcom_legacy_redirector_request_path', $url );
 
@@ -70,11 +72,11 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	/**
- 	 *
- 	 * @param string $from_url URL or path that should be redirected; should have leading slash if path.
- 	 * @param int|string $redirect_to The post ID or URL to redirect to.
- 	 * @return bool|WP_Error Error if invalid redirect URL specified or if the URI already has a rule; false if not is_admin, true otherwise.
- 	 */
+	 *
+	 * @param string $from_url URL or path that should be redirected; should have leading slash if path.
+	 * @param int|string $redirect_to The post ID or URL to redirect to.
+	 * @return bool|WP_Error Error if invalid redirect URL specified or if the URI already has a rule; false if not is_admin, true otherwise.
+	 */
 	static function insert_legacy_redirect( $from_url, $redirect_to ) {
 
 		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! is_admin() && ! apply_filters( 'wpcom_legacy_redirector_allow_insert', false ) ) {
@@ -101,7 +103,7 @@ class WPCOM_Legacy_Redirector {
 
 		if ( is_numeric( $redirect_to ) ) {
 			$args['post_parent'] = $redirect_to;
-		} elseif ( false !== parse_url( $redirect_to ) ) {
+		} elseif ( false !== wp_parse_url( $redirect_to ) ) {
 			$args['post_excerpt'] = esc_url_raw( $redirect_to );
 		} else {
 			return new WP_Error( 'invalid-redirect-url', 'Invalid redirect_to param; should be a post_id or a URL' );
@@ -115,7 +117,7 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	static function get_redirect_uri( $url ) {
-		
+
 		$url = self::normalise_url( $url );
 		if ( is_wp_error( $url ) ) {
 			return false;
@@ -152,10 +154,19 @@ class WPCOM_Legacy_Redirector {
 
 		$url_hash = self::get_url_hash( $url );
 
-		$redirect_post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash ) );
+		// Allow plugins to disable lowercase.
+		if ( apply_filters( 'wpcom_legacy_redirector_check_lowercase', true ) ) {
+			$lowercase_url_hash = self::get_url_hash( self::lowercase( $url ) );
+			$select_query       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND (post_name = %s OR post_name = %s) LIMIT 1", self::POST_TYPE, $url_hash, $lowercase_url_hash );
+		} else {
+			$select_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash );
+		}
 
-		if ( ! $redirect_post_id )
+		$redirect_post_id = $wpdb->get_var( $select_query );
+
+		if ( ! $redirect_post_id ) {
 			$redirect_post_id = 0;
+		}
 
 		return $redirect_post_id;
 	}
@@ -203,12 +214,21 @@ class WPCOM_Legacy_Redirector {
 		$normalised_url = $components['path'];
 
 		// Only append '?' and the query if there is one
-		if( ! empty( $components['query'] ) ) {
+		if ( ! empty( $components['query'] ) ) {
 			$normalised_url = $components['path'] . '?' . $components['query'];
 		}
 
 		return $normalised_url;
 
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function lowercase( $string ) {
+		return ! empty( $string ) ? strtolower( $string ) : $string;
 	}
 }
 
