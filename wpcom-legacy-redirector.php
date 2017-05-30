@@ -72,12 +72,13 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	/**
-	 *
-	 * @param string $from_url URL or path that should be redirected; should have leading slash if path.
+	 * @param string $from_url        URL or path that should be redirected; should have leading slash if path.
 	 * @param int|string $redirect_to The post ID or URL to redirect to.
-	 * @return bool|WP_Error Error if invalid redirect URL specified or if the URI already has a rule; false if not is_admin, true otherwise.
+	 * @param bool $validate          Validate $from_url and $redirect_to values.
+	 *
+	 * @return bool|string|\WP_Error Error if invalid redirect URL specified or if the URI already has a rule; false if not is_admin, true otherwise.
 	 */
-	static function insert_legacy_redirect( $from_url, $redirect_to ) {
+	static function insert_legacy_redirect( $from_url, $redirect_to, $validate = true ) {
 
 		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! is_admin() && ! apply_filters( 'wpcom_legacy_redirector_allow_insert', false ) ) {
 			// never run on the front end
@@ -87,6 +88,11 @@ class WPCOM_Legacy_Redirector {
 		$from_url = self::normalise_url( $from_url );
 		if ( is_wp_error( $from_url ) ) {
 			return $from_url;
+		}
+
+		if ( $validate && false === self::validate( $from_url, $redirect_to ) ) {
+			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'invalid-values', $message );
 		}
 
 		$from_url_hash = self::get_url_hash( $from_url );
@@ -174,7 +180,7 @@ class WPCOM_Legacy_Redirector {
 
 		$url_hash = self::get_url_hash( $url );
 
-		// Allow plugins to disable lowercase.
+		// Allow plugins to disable lowercase. Check in case we transform to lowercase.
 		if ( apply_filters( 'wpcom_legacy_redirector_check_lowercase', true ) ) {
 			$lowercase_url_hash = self::get_url_hash( self::lowercase( $url ) );
 			$select_query       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND (post_name = %s OR post_name = %s) LIMIT 1", self::POST_TYPE, $url_hash, $lowercase_url_hash );
@@ -238,6 +244,12 @@ class WPCOM_Legacy_Redirector {
 			$normalised_url = $components['path'] . '?' . $components['query'];
 		}
 
+		// Allow plugins to disable lowercase.
+		if ( apply_filters( 'wpcom_legacy_redirector_check_lowercase', true ) ) {
+			// Transform to lowercase.
+			$normalised_url = self::lowercase( $normalised_url );
+		}
+
 		return $normalised_url;
 
 	}
@@ -249,6 +261,25 @@ class WPCOM_Legacy_Redirector {
 	 */
 	public static function lowercase( $string ) {
 		return ! empty( $string ) ? strtolower( $string ) : $string;
+	}
+
+	/**
+	 * @param $url
+	 *
+	 * @return string
+	 */
+	public static function transform( $url ) {
+		return trim( self::lowercase( $url ), '/' );
+	}
+
+	/**
+	 * @param $from_url
+	 * @param $redirect_to
+	 *
+	 * @return bool
+	 */
+	public static function validate( $from_url, $redirect_to ) {
+		return ( ! empty( $from_url ) && ! empty( $redirect_to ) && self::transform( $from_url ) !== self::transform( $redirect_to ) );
 	}
 }
 
