@@ -62,18 +62,19 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	}
 
 	/**
- 	 * Insert a single redirect
- 	 *
- 	 * @subcommand insert-redirect
- 	 * @synopsis <from_url> <to_url>
- 	 */
+	 * Insert a single redirect
+	 *
+	 * @subcommand insert-redirect
+	 * @synopsis <from_url> <to_url>
+	 */
 	function insert_redirect( $args, $assoc_args ) {
 		$from_url = esc_url_raw( $args[0] );
 
-		if ( is_numeric( $args[1] ) )
+		if ( is_numeric( $args[1] ) ) {
 			$to_url = absint( $args[1] );
-		else
+		} else {
 			$to_url = esc_url_raw( $args[1] );
+		}
 
 		$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $to_url );
 
@@ -85,7 +86,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	}
 
 	/**
- 	 * Bulk import redirects from URLs stored as meta values for posts.
+	 * Bulk import redirects from URLs stored as meta values for posts.
 	 *
 	 * ## OPTIONS
 	 *
@@ -110,10 +111,10 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	 *
 	 * [--verbose]
 	 * : Display notices for sucessful imports and duplicates (if skip_dupes is used)
- 	 *
- 	 * @subcommand import-from-meta
+	 *
+	 * @subcommand import-from-meta
 	 * @synopsis --meta_key=<name-of-meta-key> [--start=<start-offset>] [--end=<end-offset>] [--skip_dupes=<skip-dupes>] [--format=<format>] [--dry_run] [--verbose]
- 	 */
+	 */
 	function import_from_meta( $args, $assoc_args ) {
 		define( 'WP_IMPORTING', true );
 
@@ -121,7 +122,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 		$offset = isset( $assoc_args['start'] ) ? intval( $assoc_args['start'] ) : 0;
 		$end_offset = isset( $assoc_args['end'] ) ? intval( $assoc_args['end'] ) : 99999999;;
 		$meta_key = isset( $assoc_args['meta_key'] ) ? sanitize_key( $assoc_args['meta_key'] ) : '';
-		$skip_dupes = isset( $assoc_args['skip_dupes'] ) ? (bool)intval( $assoc_args['skip_dupes'] ) : false;
+		$skip_dupes = isset( $assoc_args['skip_dupes'] ) ? (bool) intval( $assoc_args['skip_dupes'] ) : false;
 		$format = \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' );
 		$dry_run = isset( $assoc_args['dry_run'] ) ? true : false;
 		$verbose = isset( $assoc_args['verbose'] ) ? true : false;
@@ -185,8 +186,9 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				}
 
 				if ( 0 == $i % 100 ) {
-					if ( function_exists( 'stop_the_insanity' ) )
+					if ( function_exists( 'stop_the_insanity' ) ) {
 						stop_the_insanity();
+					}
 					sleep( 1 );
 				}
 			}
@@ -203,10 +205,10 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	}
 
 	/**
- 	 * Bulk import redirects from a CSV file matching the following structure:
- 	 *
- 	 * redirect_from_path,(redirect_to_post_id|redirect_to_path|redirect_to_url)
- 	 *
+	 * Bulk import redirects from a CSV file matching the following structure:
+	 *
+	 * redirect_from_path,(redirect_to_post_id|redirect_to_path|redirect_to_url)
+	 *
 	 * ## OPTIONS
 	 *
 	 * [--format=<format>]
@@ -222,9 +224,9 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	 *
 	 * [--verbose]
 	 *
- 	 * @subcommand import-from-csv
+	 * @subcommand import-from-csv
 	 * @synopsis --csv=<path-to-csv> [--format=<format>] [--verbose]
- 	 */
+	 */
 	function import_from_csv( $args, $assoc_args ) {
 		define( 'WP_IMPORTING', true );
 		$format = \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' );
@@ -271,8 +273,9 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				}
 
 				if ( 0 == $row % 100 ) {
-					if ( function_exists( 'stop_the_insanity' ) )
+					if ( function_exists( 'stop_the_insanity' ) ) {
 						stop_the_insanity();
+					}
 					sleep( 1 );
 				}
 			}
