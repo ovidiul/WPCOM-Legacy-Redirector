@@ -4,11 +4,12 @@
  * Plugin URI: https://vip.wordpress.com/plugins/wpcom-legacy-redirector/
  * Description: Simple plugin for handling legacy redirects in a scalable manner.
  * Version: 1.2.0
+ * Requires PHP: 5.6
  * Author: Automattic / WordPress.com VIP
  * Author URI: https://vip.wordpress.com
  *
  * This is a no-frills plugin (no UI, for example). Data entry needs to be bulk-loaded via the wp-cli commands provided or custom scripts.
- * 
+ *
  * Redirects are stored as a custom post type and use the following fields:
  *
  * - post_name for the md5 hash of the "from" path or URL.
@@ -153,8 +154,9 @@ class WPCOM_Legacy_Redirector {
 	static function maybe_do_redirect() {
 		// Avoid the overhead of running this on every single pageload.
 		// We move the overhead to the 404 page but the trade-off for site performance is worth it.
-		if ( ! is_404() )
+		if ( ! is_404() ) {
 			return;
+		}
 
 		$url = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 
@@ -222,7 +224,7 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	static function get_redirect_uri( $url ) {
-		
+
 		$url = self::normalise_url( $url );
 		if ( is_wp_error( $url ) ) {
 			return false;
@@ -238,12 +240,12 @@ class WPCOM_Legacy_Redirector {
 		if ( ! empty( $query_params ) ) { // Verify Query Params exist.
 
 			// Parse Query String to Associated Array.
-			parse_str($query_params, $param_values);
- 			// For every white listed param save value and strip from url
-			foreach ($protected_params as $protected_param) {
-				if (!empty($param_values[$protected_param])) {
-					$protected_param_values[$protected_param] = $param_values[$protected_param];
-					$url = remove_query_arg($protected_param, $url);
+			parse_str( $query_params, $param_values );
+			// For every white listed param save value and strip from url
+			foreach ( $protected_params as $protected_param ) {
+				if ( ! empty( $param_values[ $protected_param ] ) ) {
+					$protected_param_values[ $protected_param ] = $param_values[ $protected_param ];
+					$url = remove_query_arg( $protected_param, $url );
 				}
 			}
 		}
@@ -281,8 +283,9 @@ class WPCOM_Legacy_Redirector {
 
 		$redirect_post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash ) );
 
-		if ( ! $redirect_post_id )
+		if ( ! $redirect_post_id ) {
 			$redirect_post_id = 0;
+		}
 
 		return $redirect_post_id;
 	}
@@ -330,7 +333,7 @@ class WPCOM_Legacy_Redirector {
 		$normalised_url = $components['path'];
 
 		// Only append '?' and the query if there is one
-		if( ! empty( $components['query'] ) ) {
+		if ( ! empty( $components['query'] ) ) {
 			$normalised_url = $components['path'] . '?' . $components['query'];
 		}
 
