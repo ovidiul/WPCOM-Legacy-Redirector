@@ -36,12 +36,38 @@ class WPCOM_Legacy_Redirector {
 		add_action( 'init', array( __CLASS__, 'init' ) );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
+		load_plugin_textdomain( 'vip-legacy-redirect', false, basename( dirname( __FILE__ ) ) . '/languages' );
 	}
 
 	static function init() {
-		register_post_type( self::POST_TYPE, array(
-			'public' => false,
-		) );
+		$labels = array(
+			'name'                  => _x( 'Redirect Manager', 'Post type general name', 'wpcom-legacy-redirector' ),
+			'singular_name'         => _x( 'Redirect Manager', 'Post type singular name', 'wpcom-legacy-redirector' ),
+			'menu_name'             => _x( 'Redirect Manager', 'Admin Menu text', 'wpcom-legacy-redirector' ),
+			'name_admin_bar'        => _x( 'Redirect Manager', 'Add New on Toolbar', 'wpcom-legacy-redirector' ),
+			'add_new'               => __( 'Add New', 'wpcom-legacy-redirector' ),
+			'add_new_item'          => __( 'Add New Redirect', 'wpcom-legacy-redirector' ),
+			'new_item'              => __( 'New Redirect', 'wpcom-legacy-redirector' ),
+			'all_items'             => __( 'All Redirects', 'wpcom-legacy-redirector' ),
+			'search_items'          => __( 'Search Redirects', 'wpcom-legacy-redirector' ),
+			'not_found'             => __( 'No redirects found.', 'wpcom-legacy-redirector' ),
+			'not_found_in_trash'    => __( 'No redirects found in Trash.', 'wpcom-legacy-redirector' ),
+			'filter_items_list'     => _x( 'Filter redirects list', 'Screen reader text for the filter links heading on the post type listing screen. Default “Filter posts list”/”Filter pages list”. Added in 4.4', 'wpcom-legacy-redirector' ),
+			'items_list_navigation' => _x( 'Redirect list navigation', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'wpcom-legacy-redirector' ),
+			'items_list'            => _x( 'Redirects list', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'wpcom-legacy-redirector' ),
+		);
+
+		$args = array(
+			'labels'             => $labels,
+			'public'             => true,
+			'rewrite'            => array( 'slug' => 'book' ),
+			'capability_type'    => 'post',
+			'hierarchical'       => false,
+			'menu_position'      => 100,
+			'menu_icon'          => 'dashicons-external',
+			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+		);
+		register_post_type( self::POST_TYPE, $args );
 	}
 
 	static function maybe_do_redirect() {
