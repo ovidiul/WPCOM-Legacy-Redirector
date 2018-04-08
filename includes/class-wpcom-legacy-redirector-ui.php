@@ -306,6 +306,13 @@ class WPCOM_Legacy_Redirector_UI {
 				} else {
 					$from_url	= sanitize_text_field( $_POST['from_url'] );
 					$redirect_to = sanitize_text_field( $_POST['redirect_to'] );
+
+					// Check if $from_url is not a 404.  Only 404 links are redirected in this plugin.
+					$status = $this->check_if_404( home_url() . $from_url );
+					if ( 404 !== $status ) {
+						$from_url = '';
+					}
+
 					if ( WPCOM_Legacy_Redirector::validate( $from_url, $redirect_to ) ) {
 						$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $redirect_to, false );
 						if ( true === $output ) {
@@ -327,10 +334,18 @@ class WPCOM_Legacy_Redirector_UI {
 							}
 						}
 					} else {
-						$errors[] = array(
-							'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
-							'message' => __( 'Check the values you are using to save the redirect. All fields are required. "Redirect From" and "Redirect To" should not match.', 'wpcom-legacy-redirector' ),
-						);
+						if ( $from_url === '' ) {
+							$errors[] = array(
+								'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
+								'message' => __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' ),
+							);
+							$output = false;
+						} else {
+							$errors[] = array(
+								'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
+								'message' => __( 'Check the values you are using to save the redirect. All fields are required. "Redirect From" and "Redirect To" should not match.', 'wpcom-legacy-redirector' ),
+							);
+						}
 					}
 				}
 			}
