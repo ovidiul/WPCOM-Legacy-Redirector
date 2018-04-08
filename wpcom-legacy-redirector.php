@@ -64,6 +64,8 @@ class WPCOM_Legacy_Redirector {
 			'capability_type'    => 'post',
 			'hierarchical'       => false,
 			'menu_position'      => 100,
+			'capabilities'       => array( 'create_posts' => 'do_not_allow' ),
+			'map_meta_cap'       => true,
 			'menu_icon'          => 'dashicons-external',
 			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 		);
