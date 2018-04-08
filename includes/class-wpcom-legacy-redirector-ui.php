@@ -13,6 +13,8 @@ class WPCOM_Legacy_Redirector_UI {
 		add_filter( 'manage_vip-legacy-redirect_posts_columns', array( $this, 'set_vip_legacy_redirects_columns' ) );
 		add_filter( 'post_row_actions', array( $this, 'modify_list_row_actions' ), 10, 2 );
 		add_filter( 'removable_query_args', array( $this, 'add_removable_arg' ) );
+		add_filter( 'views_edit-vip-legacy-redirect', array( $this, 'vip_redirects_custom_post_status_filters' ) );
+
 	}
 	/**
 	 * Add Submenu Page.
@@ -77,6 +79,13 @@ class WPCOM_Legacy_Redirector_UI {
 			'to' => __( 'Redirect To' ),
 			'date' => __( 'Date' ),
 		);
+	}
+	/**
+	 * Remove "draft" from the status filters for vip-legacy-redirect post type.
+	 */
+	public function vip_redirects_custom_post_status_filters( $views ) {
+		unset( $views['draft'] );
+		return $views;
 	}
 	/**
 	 * Add the data to the custom columns for the book post type.
