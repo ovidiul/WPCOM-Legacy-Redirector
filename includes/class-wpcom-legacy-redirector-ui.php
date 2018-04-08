@@ -111,7 +111,11 @@ class WPCOM_Legacy_Redirector_UI {
 					} elseif ( 0 === strpos( $excerpt, 'http' ) ) {
 						echo esc_url_raw( $excerpt );
 					} else {
-						$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+						if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
+							$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
+						} else {
+							$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+						}
 						// Check if it's a Post
 						if ( ! is_null( $post_obj ) ) {
 							// Check if Post is not Published
@@ -216,9 +220,12 @@ class WPCOM_Legacy_Redirector_UI {
 						$redirect = 'valid';
 					} else {
 						$redirect = home_url() . $excerpt;
-						$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
-						if ( 404 !== $this->check_if_404( $redirect ) && ! is_null( $post_obj ) ) {
+						if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
+							$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
+						} else {
 							$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+						}
+						if ( 404 !== $this->check_if_404( $redirect ) && ! is_null( $post_obj ) ) {
 							if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
 								$redirect = 'private';
 							}
