@@ -187,7 +187,12 @@ class WPCOM_Legacy_Redirector_UI {
 	 * @param string $url The URL.
 	 */
 	public function check_if_404( $url ) {
-		$response = wp_remote_get( $url );
+
+		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
+			$response = vip_safe_wp_remote_get( $url );
+		} else {
+			$response = wp_remote_get( $url );
+		}
 		$response_code = '';
 		if ( is_array( $response ) ) {
 			$response_code = wp_remote_retrieve_response_code( $response );
