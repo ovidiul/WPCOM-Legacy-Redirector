@@ -1,14 +1,291 @@
 <?php
 
 class WPCOM_Legacy_Redirector_UI {
+	/**
+	 * Constructor Class.
+	 */
+	public function __construct() {
+		add_action( 'admin_notices', array( $this, 'validate_redirects_notices' ), 10, 2 );
+		add_action( 'manage_vip-legacy-redirect_posts_custom_column' , array( $this, 'custom_vip_legacy_redirect_column' ), 10, 2 );
+		add_action( 'load-edit.php', array( $this, 'default_show_excerpt_wp_table' ) );
+		add_action( 'plugins_loaded', array( $this, 'validate_vip_legacy_redirect' ), 10, 2 );
 
-	public function admin_menu() {
-		add_menu_page( 'WPCOM Legacy Redirector', 'Redirect Manager', 'manage_options', 'wpcom-legacy-redirector', array(
-			$this,
-			'generate_page_html',
-		), 'dashicons-external' );
+		add_filter( 'manage_vip-legacy-redirect_posts_columns', array( $this, 'set_vip_legacy_redirects_columns' ) );
+		add_filter( 'post_row_actions', array( $this, 'modify_list_row_actions' ), 10, 2 );
+		add_filter( 'removable_query_args', array( $this, 'add_removable_arg' ) );
 	}
+	/**
+	 * Add Submenu Page.
+	 */
+	public function admin_menu() {
+		add_submenu_page(
+			'edit.php?post_type=vip-legacy-redirect',
+			__( 'Add Redirect', 'wpcom-legacy-redirector' ),
+			__( 'Add Redirect', 'wpcom-legacy-redirector' ),
+			'manage_options',
+			'wpcom-legacy-redirector',
+			array( $this, 'generate_page_html' )
+		);
+	}
+	/**
+	 * Set the $args that can be removed for validation purposes.
+	 *
+	 * @param array $args The Args: coming to a theatre near you.
+	 */
+	public function add_removable_arg( $args ) {
+		array_push( $args, 'validate', 'ids' );
+		return $args;
+	}
+	/**
+	 * Always show UI with Excerpts.
+	 */
+	public function default_show_excerpt_wp_table() {
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : '';
+	}
+	/**
+	 * Notices for the redirect validation.
+	 */
+	public function validate_redirects_notices() {
+		$redirect_not_valid_text = __( 'Redirect is not valid', 'wpcom-legacy-redirector' );
+		if ( isset( $_GET['validate']) ) {
+			if ( 'invalid' === $_GET['validate'] ) {
+				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' ) . '</p></div>';
+			}
+			if ( '404' === $_GET['validate'] ) {
+				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'Redirect is pointing to a page with the HTTP status of 404.', 'wpcom-legacy-redirector' ) . '</p></div>';
+			}
+			if ( 'valid' === $_GET['validate'] ) {
+				echo '<div id="message" class="updated notice is-dismissible"><p>' . esc_html__( 'Redirect Valid.', 'wpcom-legacy-redirector' ) . '</p></div>';
+			}
+			if ( 'private' === $_GET['validate'] ) {
+				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'The redirect is pointing to content that is not publiclly accessible.', 'wpcom-legacy-redirector' ) . '</p></div>';
+			}
+			if ( 'null' === $_GET['validate'] ) {
+				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'The redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</p></div>';
+			}
+		}
+	}
+	/**
+	 * Set Columns for Redirect Table.
+	 *
+	 * @param array $columns Columns to show for the post type.
+	 */
+	public function set_vip_legacy_redirects_columns( $columns ) {
+		return array(
+			'cb' => '<input type="checkbox" />',
+			'from' => __( 'Redirect From' ),
+			'to' => __( 'Redirect To' ),
+			'date' => __( 'Date' ),
+		);
+	}
+	/**
+	 * Add the data to the custom columns for the book post type.
+	 * Provide warnings for possibly bad redirects.
+	 *
+	 * @param string $column The Column for the post_type table.
+	 * @param int $post_id  The Post ID.
+	 */
+	public function custom_vip_legacy_redirect_column( $column, $post_id ) {
+		switch ( $column ) {
+			case 'from':
+				echo esc_html( get_the_title( $post_id ) );
+				break;
+			case 'to':
+				$post_types = get_post_types();
+				$excerpt = get_the_excerpt( $post_id );
 
+				// Check if the Post is Published.
+				if ( ! empty( $excerpt ) ) {
+					// Check if it's the Home URL
+					if ( '/' === $excerpt || home_url() === $excerpt ) {
+						echo esc_html( $excerpt );
+					} elseif ( 0 === strpos( $excerpt, 'http' ) ) {
+						echo esc_url_raw( $excerpt );
+					} else {
+						$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+						// Check if it's a Post
+						if ( ! is_null( $post_obj ) ) {
+							// Check if Post is not Published
+							if ( 'publish' !== $post_obj->post_status ) {
+								echo esc_html( $excerpt ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>';
+							} else {
+								echo esc_html( $excerpt );
+							}
+						} else {
+							echo esc_html( $excerpt );
+						}
+					}
+				} else {
+					$post = get_post( $post_id );
+					$parent = get_post( $post->post_parent );
+					if ( is_null( get_post( $post->post_parent ) ) ) {
+						echo '<em>' . esc_html__( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</em>';
+					} elseif ( 'publish' !== get_post_status( $parent ) ) {
+						echo ( esc_html( get_permalink( $parent ) ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>' );
+					} else {
+						$parent_slug = $parent->post_name;
+						echo esc_html( '/' . $parent_slug );
+					}
+				}
+				break;
+		}
+	}
+	/**
+	 * Modify the Row Actions for the vip-legacy-redirect post type.
+	 *
+	 * @param array $actions Default Actions.
+	 * @param object $post the current Post.
+	 */
+	public function modify_list_row_actions( $actions, $post ) {
+		// Check for your post type.
+		if ( 'vip-legacy-redirect' === $post->post_type ) {
+
+			$url = admin_url( 'post.php?post=vip-legacy-redirect&post=' . $post->ID );
+
+			if ( isset( $_GET['post_status'] ) && 'trash' === $_GET['post_status'] ) {
+				return $actions;
+			}
+			$trash = $actions['trash'];
+			$actions = array();
+
+			if ( current_user_can( 'manage_options' ) ) {
+
+				// Add a nonce to Validate Link
+				$validate_link = wp_nonce_url( add_query_arg( array(
+					'action' => 'validate',
+				), $url ), 'validate_vip_legacy_redirect', '_validate_redirect' );
+
+				// Add the Validate Link
+				$actions = array_merge( $actions, array(
+					'validate' => sprintf( '<a href="%1$s">%2$s</a>',
+						esc_url( $validate_link ), 
+						'Validate'
+					),
+				) );
+				// Re-insert thrash link preserved from the default $actions.
+				$actions['trash'] = $trash;
+			}
+		}
+		return $actions;
+	}
+	/**
+	 * Check if URL is a 404.
+	 *
+	 * @param string $url The URL.
+	 */
+	public function check_if_404( $url ) {
+		$response = wp_remote_get( $url );
+		$response_code = '';
+		if ( is_array( $response ) ) {
+			$response_code = wp_remote_retrieve_response_code( $response );
+		}
+		return $response_code;
+	}
+	/**
+	 * Validate the Redirect To URL.
+	 */
+	public function validate_vip_legacy_redirect() {
+
+		$sendback = admin_url( 'edit.php?post_type=vip-legacy-redirect' );
+		$sendback = remove_query_arg( array( 'validate', 'ids' ), $sendback );
+
+		if ( isset( $_GET['action'] ) && 'validate' === $_GET['action'] ) {
+			$nonce = $_REQUEST['_validate_redirect'];
+			$post = get_post( $_GET['post'] );
+			if ( ! isset( $_REQUEST['_validate_redirect'] ) || ! wp_verify_nonce( $_REQUEST['_validate_redirect'], 'validate_vip_legacy_redirect' ) ) {
+				return;
+			} else {
+				// Check if the Redirect is stored in the Excerpt
+				if ( has_excerpt( $post->ID ) ) {
+					$post_types = get_post_types();
+					$excerpt = get_the_excerpt( $post->ID );
+
+					// Check if redirect is a full URL or not.
+					if ( 0 === strpos( $excerpt, 'http' ) ) {
+						$redirect = $excerpt;
+					} elseif ( '/' === $excerpt ) {
+						$redirect = 'valid';
+					} else {
+						$redirect = home_url() . $excerpt;
+						$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+						if ( 404 !== $this->check_if_404( $redirect ) && ! is_null( $post_obj ) ) {
+							$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+							if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
+								$redirect = 'private';
+							}
+						}
+					}
+				} else {
+					// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
+					$post = get_post( $post->ID );
+					$parent = get_post( $post->post_parent );
+					$parent_post_status = get_post_status( $parent );
+
+					if ( is_null( get_post( $post->post_parent ) ) ) {
+						$redirect = 'null';
+					} elseif ( 'publish' !== get_post_status( $parent ) ) {
+						$redirect = 'private';
+					} else {
+						$parent_slug = $parent->post_name;
+						echo '/' . $parent_slug;
+						$redirect = home_url() . '/' . $parent_slug;
+					}
+				}
+				$status = $this->check_if_404( $redirect );
+
+				// Check if $redirect is invalid.
+				if ( ! wp_validate_redirect( $redirect, false ) ) {
+					wp_safe_redirect( add_query_arg(
+						array(
+							'validate'  => 'invalid',
+							'ids'       => $post->ID,
+						), $sendback
+					) );
+					exit();
+				}
+				// Check if $redirect is a 404.
+				if ( 404 === $status ) {
+					wp_safe_redirect( add_query_arg(
+						array(
+							'validate'  => '404',
+							'ids'       => $post->ID,
+						), $sendback
+					) );
+					exit();
+				}
+				// Check if $redirect is not publicly visible.
+				if ( 'private' === $redirect ) {
+					wp_safe_redirect( add_query_arg(
+						array(
+							'validate'  => 'private',
+							'ids'       => $post->ID,
+						), $sendback
+					) );
+					exit();
+				}
+				// Check if $redirect is pointing to a null Post ID.
+				if ( 'null' === $redirect ) {
+					wp_safe_redirect( add_query_arg(
+						array(
+							'validate'  => 'null',
+							'ids'       => $post->ID,
+						), $sendback
+					) );
+					exit();
+				}
+				// Check if $redirect is valid.
+				if ( wp_validate_redirect( $redirect, false ) && 404 !== $status || 'valid' === $redirect ) {
+					wp_safe_redirect( add_query_arg(
+						array(
+							'validate'  => 'valid',
+							'ids'       => $post->ID,
+						), $sendback
+					) );
+					exit();
+				}
+			}
+		}
+	}
 	public function generate_page_html() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
