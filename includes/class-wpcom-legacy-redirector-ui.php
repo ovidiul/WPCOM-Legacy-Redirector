@@ -204,9 +204,7 @@ class WPCOM_Legacy_Redirector_UI {
 	 */
 	public function validate_vip_legacy_redirect() {
 
-		$sendback = admin_url( 'edit.php?post_type=vip-legacy-redirect' );
-		$sendback = remove_query_arg( array( 'validate', 'ids' ), $sendback );
-
+		$sendback = remove_query_arg( array( 'validate', 'ids' ),  wp_get_referer() );
 		if ( isset( $_GET['action'] ) && 'validate' === $_GET['action'] ) {
 			$nonce = $_REQUEST['_validate_redirect'];
 			$post = get_post( $_GET['post'] );
