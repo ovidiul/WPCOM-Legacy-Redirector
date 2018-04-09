@@ -88,7 +88,7 @@ class WPCOM_Legacy_Redirector_UI {
 		return $views;
 	}
 	/**
-	 * Add the data to the custom columns for the book post type.
+	 * Add the data to the custom columns for the vip-legacy-redirects post type.
 	 * Provide warnings for possibly bad redirects.
 	 *
 	 * @param string $column The Column for the post_type table.
