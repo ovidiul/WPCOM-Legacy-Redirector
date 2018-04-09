@@ -8,7 +8,7 @@ class WPCOM_Legacy_Redirector_UI {
 		add_action( 'admin_notices', array( $this, 'validate_redirects_notices' ), 10, 2 );
 		add_action( 'manage_vip-legacy-redirect_posts_custom_column' , array( $this, 'custom_vip_legacy_redirect_column' ), 10, 2 );
 		add_action( 'load-edit.php', array( $this, 'default_show_excerpt_wp_table' ) );
-		add_action( 'plugins_loaded', array( $this, 'validate_vip_legacy_redirect' ), 10, 2 );
+		add_action( 'after_setup_theme', array( $this, 'validate_vip_legacy_redirect' ), 10, 2 );
 
 		add_filter( 'manage_vip-legacy-redirect_posts_columns', array( $this, 'set_vip_legacy_redirects_columns' ) );
 		add_filter( 'post_row_actions', array( $this, 'modify_list_row_actions' ), 10, 2 );
