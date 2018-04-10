@@ -391,39 +391,39 @@ class WPCOM_Legacy_Redirector_UI {
 				</div>
 			<?php endif; ?>
 
-			<form method="post">
-				<?php wp_nonce_field( - 1, 'redirect_nonce_field' ); ?>
+            <form method="post">
+                <?php wp_nonce_field( - 1, 'redirect_nonce_field' ); ?>
 
-				<table class="form-table">
-					<tbody>
-					<tr>
-						<th>
-							<label for="from_url"><?php esc_html_e( 'Redirect From', 'wpcom-legacy-redirector' ); ?></label>
-						</th>
-						<td>
-							<input name="from_url" type="text" id="from_url" value="" class="regular-text">
-							<p class="description"><?php esc_html_e( 'This path should be relative to the root, e.g. "/hello".', 'wpcom-legacy-redirector' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th>
-							<label for="redirect_to"><?php esc_html_e( 'Redirect To', 'wpcom-legacy-redirector' ); ?></label>
-						</th>
-						<td>
-							<input name="redirect_to" type="text" id="redirect_to" value="" class="regular-text">
-							<p class="description"><?php esc_html_e( 'To redirect to a post you can use the post_id, e.g. "100".', '' ); ?></p>
-						</td>
-					</tr>
-					</tbody>
-				</table>
+                <table class="form-table">
+                    <tbody>
+                    <tr>
+                        <th>
+                            <label for="from_url"><?php esc_html_e( 'Redirect From', 'wpcom-legacy-redirector' ); ?></label>
+                        </th>
+                        <td>
+                            <input name="from_url" type="text" id="from_url" value="" class="regular-text">
+                            <p class="description"><?php esc_html_e( 'This path should be relative to the root, e.g. "/hello".', 'wpcom-legacy-redirector' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for="redirect_to"><?php esc_html_e( 'Redirect To', 'wpcom-legacy-redirector' ); ?></label>
+                        </th>
+                        <td>
+                            <input name="redirect_to" type="text" id="redirect_to" value="" class="regular-text">
+                            <p class="description"><?php esc_html_e( 'To redirect to a post you can use the post_id, e.g. "100".', '' ); ?></p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
 
-				<p class="submit">
-					<input type="submit" name="submit" id="submit" class="button button-primary"
-						   value="<?php esc_attr_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?>">
-				</p>
-			</form>
+                <p class="submit">
+                    <input type="submit" name="submit" id="submit" class="button button-primary"
+                           value="<?php esc_attr_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?>">
+                </p>
+            </form>
 
-		</div>
-		<?php
-	}
+        </div>
+        <?php
+    }
 }
