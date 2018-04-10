@@ -34,6 +34,7 @@ class WPCOM_Legacy_Redirector {
 
 	static function start() {
 		add_action( 'init', array( __CLASS__, 'init' ) );
+		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability') );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
 		load_plugin_textdomain( 'vip-legacy-redirect', false, basename( dirname( __FILE__ ) ) . '/languages' );
@@ -70,6 +71,19 @@ class WPCOM_Legacy_Redirector {
 			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 		);
 		register_post_type( self::POST_TYPE, $args );
+	}
+	/**
+	 * Register custom role using VIP Helpers with fallbacks.
+	 */
+	static function register_redirect_custom_capability() {
+		$cap = apply_filters( 'manage_redirect_capability', 'manage_redirects' );
+		if ( function_exists( 'wpcom_vip_add_role_caps' ) ) {
+			wpcom_vip_add_role_caps( 'administrator', $cap );
+			wpcom_vip_add_role_caps( 'editor', $cap );
+		} else {
+			$role = get_role( 'editor' );
+			$role->add_cap( $cap );
+		}
 	}
 
 	static function maybe_do_redirect() {
