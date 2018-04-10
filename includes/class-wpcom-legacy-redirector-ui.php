@@ -24,7 +24,7 @@ class WPCOM_Legacy_Redirector_UI {
 			'edit.php?post_type=vip-legacy-redirect',
 			__( 'Add Redirect', 'wpcom-legacy-redirector' ),
 			__( 'Add Redirect', 'wpcom-legacy-redirector' ),
-			'manage_options',
+			'manage_redirects',
 			'wpcom-legacy-redirector',
 			array( $this, 'generate_page_html' )
 		);
@@ -161,8 +161,7 @@ class WPCOM_Legacy_Redirector_UI {
 			$trash = $actions['trash'];
 			$actions = array();
 
-			if ( current_user_can( 'manage_options' ) ) {
-
+			if ( current_user_can( 'manage_redirects' ) ) {
 				// Add a nonce to Validate Link
 				$validate_link = wp_nonce_url( add_query_arg( array(
 					'action' => 'validate',
@@ -306,7 +305,7 @@ class WPCOM_Legacy_Redirector_UI {
 		}
 	}
 	public function generate_page_html() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'manage_redirects' ) ) {
 			return;
 		}
 
