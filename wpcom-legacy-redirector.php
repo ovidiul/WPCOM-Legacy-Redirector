@@ -38,7 +38,6 @@ class WPCOM_Legacy_Redirector {
 		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability') );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
-		load_plugin_textdomain( 'vip-legacy-redirect', false, basename( dirname( __FILE__ ) ) . '/languages' );
 	}
 
 	static function init() {
