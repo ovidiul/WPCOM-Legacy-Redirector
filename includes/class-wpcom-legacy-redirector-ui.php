@@ -108,6 +108,26 @@ class WPCOM_Legacy_Redirector_UI {
 		}
 	}
 	/**
+	 * Check if $redirect is a public Post.
+	 */
+	public function vip_legacy_redirect_check_if_public( $excerpt ) {
+
+		
+		$redirect = home_url() . $excerpt;
+		$post_types = get_post_types();
+
+		if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
+			$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
+		} else {
+			$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+		}
+		if ( ! is_null( $post_obj ) ) {
+			if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
+				return 'private';
+			}
+		}
+	}
+	/**
 	 * Add the data to the custom columns for the vip-legacy-redirects post type.
 	 * Provide warnings for possibly bad redirects.
 	 *
@@ -132,19 +152,8 @@ class WPCOM_Legacy_Redirector_UI {
 					} elseif ( 0 === strpos( $excerpt, 'http' ) ) {
 						echo esc_url_raw( $excerpt );
 					} else {
-						if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
-							$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
-						} else {
-							$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
-						}
-						// Check if it's a Post
-						if ( ! is_null( $post_obj ) ) {
-							// Check if Post is not Published
-							if ( 'publish' !== $post_obj->post_status ) {
-								echo esc_html( $excerpt ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>';
-							} else {
-								echo esc_html( $excerpt );
-							}
+						if ( 'private' === $this->vip_legacy_redirect_check_if_public( $excerpt ) ) {
+							echo esc_html( $excerpt ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>';
 						} else {
 							echo esc_html( $excerpt );
 						}
@@ -239,17 +248,7 @@ class WPCOM_Legacy_Redirector_UI {
 					} elseif ( '/' === $excerpt ) {
 						$redirect = 'valid';
 					} else {
-						$redirect = home_url() . $excerpt;
-						if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
-							$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
-						} else {
-							$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
-						}
-						if ( 404 !== $this->check_if_404( $redirect ) && ! is_null( $post_obj ) ) {
-							if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
-								$redirect = 'private';
-							}
-						}
+						$redirect = $this->vip_legacy_redirect_check_if_public( $excerpt );
 					}
 				} else {
 					// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
