@@ -50,20 +50,21 @@ class WPCOM_Legacy_Redirector_UI {
 	public function validate_redirects_notices() {
 		$redirect_not_valid_text = __( 'Redirect is not valid', 'wpcom-legacy-redirector' );
 		if ( isset( $_GET['validate']) ) {
-			if ( 'invalid' === $_GET['validate'] ) {
-				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' ) . '</p></div>';
-			}
-			if ( '404' === $_GET['validate'] ) {
-				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'Redirect is pointing to a page with the HTTP status of 404.', 'wpcom-legacy-redirector' ) . '</p></div>';
-			}
-			if ( 'valid' === $_GET['validate'] ) {
-				echo '<div id="message" class="updated notice is-dismissible"><p>' . esc_html__( 'Redirect Valid.', 'wpcom-legacy-redirector' ) . '</p></div>';
-			}
-			if ( 'private' === $_GET['validate'] ) {
-				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'The redirect is pointing to content that is not publiclly accessible.', 'wpcom-legacy-redirector' ) . '</p></div>';
-			}
-			if ( 'null' === $_GET['validate'] ) {
-				echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'The redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</p></div>';
+			switch ( $_GET['validate'] ) {
+				case 'invalid':
+					echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' ) . '</p></div>';
+					break;
+				case '404':
+					echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'Redirect is pointing to a page with the HTTP status of 404.', 'wpcom-legacy-redirector' ) . '</p></div>';
+					break;
+				case 'valid':
+					echo '<div id="message" class="updated notice is-dismissible"><p>' . esc_html__( 'Redirect Valid.', 'wpcom-legacy-redirector' ) . '</p></div>';
+					break;
+				case 'private':
+					echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'The redirect is pointing to content that is not publiclly accessible.', 'wpcom-legacy-redirector' ) . '</p></div>';
+					break;
+				case 'null':
+					echo '<div id="message" class="error notice is-dismissible"><p>' . esc_html( $redirect_not_valid_text ) . '<br />' . esc_html__( 'The redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</p></div>';
 			}
 		}
 	}
