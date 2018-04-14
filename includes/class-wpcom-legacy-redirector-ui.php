@@ -112,7 +112,6 @@ class WPCOM_Legacy_Redirector_UI {
 	 */
 	public function vip_legacy_redirect_check_if_public( $excerpt ) {
 
-		
 		$redirect = home_url() . $excerpt;
 		$post_types = get_post_types();
 
