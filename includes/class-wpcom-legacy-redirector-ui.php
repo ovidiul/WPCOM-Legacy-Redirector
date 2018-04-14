@@ -305,7 +305,7 @@ class WPCOM_Legacy_Redirector_UI {
 			if ( isset( $_POST['from_url'] ) && isset( $_POST['redirect_to'] ) ) {
 				if (
 					! isset( $_POST['redirect_nonce_field'] )
-					|| ! wp_verify_nonce( $_POST['redirect_nonce_field'] )
+					|| ! wp_verify_nonce( $_POST['redirect_nonce_field'], 'add_redirect_nonce' )
 				) {
 					$errors[] = array(
 						'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
@@ -382,7 +382,7 @@ class WPCOM_Legacy_Redirector_UI {
 			<?php endif; ?>
 
             <form method="post">
-                <?php wp_nonce_field( - 1, 'redirect_nonce_field' ); ?>
+                <?php wp_nonce_field( 'add_redirect_nonce', 'redirect_nonce_field' ); ?>
 
                 <table class="form-table">
                     <tbody>
