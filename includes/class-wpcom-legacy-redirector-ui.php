@@ -89,6 +89,25 @@ class WPCOM_Legacy_Redirector_UI {
 		return $views;
 	}
 	/**
+	 * Run checks for the Post Parent ID of the redirect.
+	 *
+	 * @param object $post The Post.
+	 */
+	public function vip_legacy_redirect_parent_id( $post ) {
+		$post = get_post( $post->ID );
+		$parent = get_post( $post->post_parent );
+		$parent_post_status = get_post_status( $parent );
+
+		if ( is_null( get_post( $post->post_parent ) ) ) {
+			return 'null';
+		} elseif ( 'publish' !== get_post_status( $parent ) ) {
+			return 'private';
+		} else {
+			$parent_slug = $parent->post_name;
+			return $parent_slug;
+		}
+	}
+	/**
 	 * Add the data to the custom columns for the vip-legacy-redirects post type.
 	 * Provide warnings for possibly bad redirects.
 	 *
@@ -101,6 +120,7 @@ class WPCOM_Legacy_Redirector_UI {
 				echo esc_html( get_the_title( $post_id ) );
 				break;
 			case 'to':
+				$post = get_post( $post_id );
 				$post_types = get_post_types();
 				$excerpt = get_the_excerpt( $post_id );
 
@@ -130,15 +150,12 @@ class WPCOM_Legacy_Redirector_UI {
 						}
 					}
 				} else {
-					$post = get_post( $post_id );
-					$parent = get_post( $post->post_parent );
-					if ( is_null( get_post( $post->post_parent ) ) ) {
+					if ( 'null' === $this->vip_legacy_redirect_parent_id( $post ) ) {
 						echo '<em>' . esc_html__( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</em>';
-					} elseif ( 'publish' !== get_post_status( $parent ) ) {
+					} elseif ( 'private' === $this->vip_legacy_redirect_parent_id( $post ) ) {
 						echo ( esc_html( get_permalink( $parent ) ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>' );
 					} else {
-						$parent_slug = $parent->post_name;
-						echo esc_html( '/' . $parent_slug );
+						echo esc_html( '/' . $this->vip_legacy_redirect_parent_id( $post ) );
 					}
 				}
 				break;
@@ -236,19 +253,7 @@ class WPCOM_Legacy_Redirector_UI {
 					}
 				} else {
 					// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
-					$post = get_post( $post->ID );
-					$parent = get_post( $post->post_parent );
-					$parent_post_status = get_post_status( $parent );
-
-					if ( is_null( get_post( $post->post_parent ) ) ) {
-						$redirect = 'null';
-					} elseif ( 'publish' !== get_post_status( $parent ) ) {
-						$redirect = 'private';
-					} else {
-						$parent_slug = $parent->post_name;
-						echo '/' . $parent_slug;
-						$redirect = home_url() . '/' . $parent_slug;
-					}
+					$redirect = $this->vip_legacy_redirect_parent_id( $post );
 				}
 				$status = $this->check_if_404( $redirect );
 
