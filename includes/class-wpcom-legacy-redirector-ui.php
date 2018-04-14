@@ -237,6 +237,8 @@ class WPCOM_Legacy_Redirector_UI {
 				return;
 			} else {
 				// Check if the Redirect is stored in the Excerpt
+				// Check if the Redirect is stored in the Excerpt instead of in the Post Parent as an ID.
+				// Excerpts can be both external or internal redirects.
 				if ( has_excerpt( $post->ID ) ) {
 					$post_types = get_post_types();
 					$excerpt = get_the_excerpt( $post->ID );
@@ -251,6 +253,7 @@ class WPCOM_Legacy_Redirector_UI {
 					}
 				} else {
 					// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
+					// Post Parent IDs are always internal redirects.
 					$redirect = $this->vip_legacy_redirect_parent_id( $post );
 				}
 				$status = $this->check_if_404( $redirect );
