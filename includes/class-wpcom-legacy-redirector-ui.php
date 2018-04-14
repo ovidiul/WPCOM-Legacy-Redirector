@@ -225,18 +225,29 @@ class WPCOM_Legacy_Redirector_UI {
 		return $response_code;
 	}
 	/**
+	 * 
+	 */
+	public function vip_legacy_redirect_sendback( $validate, $post_id ) {
+		$sendback = remove_query_arg( array( 'validate', 'ids' ),  wp_get_referer() );
+			wp_safe_redirect( add_query_arg(
+				array(
+					'validate'  => $validate,
+					'ids'       => $post_id,
+				), $sendback
+			) );
+			exit();
+	}
+	/**
 	 * Validate the Redirect To URL.
 	 */
 	public function validate_vip_legacy_redirect() {
 
-		$sendback = remove_query_arg( array( 'validate', 'ids' ),  wp_get_referer() );
 		if ( isset( $_GET['action'] ) && 'validate' === $_GET['action'] ) {
 			$nonce = $_REQUEST['_validate_redirect'];
 			$post = get_post( $_GET['post'] );
 			if ( ! isset( $_REQUEST['_validate_redirect'] ) || ! wp_verify_nonce( $_REQUEST['_validate_redirect'], 'validate_vip_legacy_redirect' ) ) {
 				return;
 			} else {
-				// Check if the Redirect is stored in the Excerpt
 				// Check if the Redirect is stored in the Excerpt instead of in the Post Parent as an ID.
 				// Excerpts can be both external or internal redirects.
 				if ( has_excerpt( $post->ID ) ) {
@@ -248,8 +259,10 @@ class WPCOM_Legacy_Redirector_UI {
 						$redirect = $excerpt;
 					} elseif ( '/' === $excerpt ) {
 						$redirect = 'valid';
+					} elseif ( 'private' === $this->vip_legacy_redirect_check_if_public( $excerpt ) ) {
+						$redirect = 'private';
 					} else {
-						$redirect = $this->vip_legacy_redirect_check_if_public( $excerpt );
+						$redirect = home_url() . $excerpt;
 					}
 				} else {
 					// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
@@ -260,53 +273,23 @@ class WPCOM_Legacy_Redirector_UI {
 
 				// Check if $redirect is invalid.
 				if ( ! wp_validate_redirect( $redirect, false ) ) {
-					wp_safe_redirect( add_query_arg(
-						array(
-							'validate'  => 'invalid',
-							'ids'       => $post->ID,
-						), $sendback
-					) );
-					exit();
+					$this->vip_legacy_redirect_sendback( 'invalid', $post->ID );
 				}
 				// Check if $redirect is a 404.
 				if ( 404 === $status ) {
-					wp_safe_redirect( add_query_arg(
-						array(
-							'validate'  => '404',
-							'ids'       => $post->ID,
-						), $sendback
-					) );
-					exit();
+					$this->vip_legacy_redirect_sendback( '404', $post->ID );
 				}
 				// Check if $redirect is not publicly visible.
 				if ( 'private' === $redirect ) {
-					wp_safe_redirect( add_query_arg(
-						array(
-							'validate'  => 'private',
-							'ids'       => $post->ID,
-						), $sendback
-					) );
-					exit();
+					$this->vip_legacy_redirect_sendback( 'private', $post->ID );
 				}
 				// Check if $redirect is pointing to a null Post ID.
 				if ( 'null' === $redirect ) {
-					wp_safe_redirect( add_query_arg(
-						array(
-							'validate'  => 'null',
-							'ids'       => $post->ID,
-						), $sendback
-					) );
-					exit();
+					$this->vip_legacy_redirect_sendback( 'null', $post->ID );
 				}
 				// Check if $redirect is valid.
 				if ( wp_validate_redirect( $redirect, false ) && 404 !== $status || 'valid' === $redirect ) {
-					wp_safe_redirect( add_query_arg(
-						array(
-							'validate'  => 'valid',
-							'ids'       => $post->ID,
-						), $sendback
-					) );
-					exit();
+					$this->vip_legacy_redirect_sendback( 'valid', $post->ID );
 				}
 			}
 		}
