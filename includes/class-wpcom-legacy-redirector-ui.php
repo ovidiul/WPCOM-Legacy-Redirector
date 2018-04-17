@@ -294,7 +294,8 @@ class WPCOM_Legacy_Redirector_UI {
 			}
 		}
 	}
-	public function generate_page_html() {
+
+	public function add_redirect_validation() {
 		if ( ! current_user_can( 'manage_redirects' ) ) {
 			return;
 		}
@@ -363,6 +364,15 @@ class WPCOM_Legacy_Redirector_UI {
 				'message' => __( 'WPCOM Legacy Redirector plugin is required to add redirects.', 'wpcom-legacy-redirector' ),
 			);
 		}
+		return array( $errors, $messages );
+
+	}
+
+	public function generate_page_html() {
+		$array = $this->add_redirect_validation();
+
+		$errors = $array[0];
+		$messages = $array[1];
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?></h1>
