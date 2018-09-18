@@ -38,6 +38,8 @@ class WPCOM_Legacy_Redirector {
 		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability') );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
+		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wpcom_legacy_add_redirect_js' ) );
+
 	}
 
 	static function init() {
@@ -114,7 +116,14 @@ class WPCOM_Legacy_Redirector {
 			}
 		}
 	}
+	function wpcom_legacy_add_redirect_js( $hook ) {
+        if( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
+                return;
+		}
+		wp_enqueue_script( 'admin-add-redirects', plugins_url( '/assets/js/admin-add-redirects.js', __FILE__ ), '' , '', true );
+		wp_localize_script('admin-add-redirects', 'WPURLS', array( 'siteurl' => get_option('siteurl') ));
 
+	}
 	/**
 	 * @param string $from_url        URL or path that should be redirected; should have leading slash if path.
 	 * @param int|string $redirect_to The post ID or URL to redirect to.

@@ -307,6 +307,12 @@ class WPCOM_Legacy_Redirector_UI {
 		$errors = $array[0];
 		$messages = $array[1];
 		?>
+		<style>
+		#from_url_value:not(:empty), #redirect_to_value:not(:empty) {
+    	margin-top: -17px;
+		color: #949494;
+		}		
+		</style>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?></h1>
 			<?php if ( !empty( $messages ) ) : ?>
@@ -334,7 +340,8 @@ class WPCOM_Legacy_Redirector_UI {
                             <label for="from_url"><?php esc_html_e( 'Redirect From', 'wpcom-legacy-redirector' ); ?></label>
                         </th>
                         <td>
-                            <input name="from_url" type="text" id="from_url" value="" class="regular-text">
+							<p id="from_url_value"></p>
+                            <input name="from_url" type="text" id="from_url" value="/" class="regular-text">
                             <p class="description"><?php esc_html_e( 'This path should be relative to the root, e.g. "/hello".', 'wpcom-legacy-redirector' ); ?></p>
                         </td>
                     </tr>
@@ -343,7 +350,8 @@ class WPCOM_Legacy_Redirector_UI {
                             <label for="redirect_to"><?php esc_html_e( 'Redirect To', 'wpcom-legacy-redirector' ); ?></label>
                         </th>
                         <td>
-                            <input name="redirect_to" type="text" id="redirect_to" value="" class="regular-text">
+							<p id="redirect_to_value"></p>
+                            <input name="redirect_to" type="text" id="redirect_to" value="/" class="regular-text">
                             <p class="description"><?php esc_html_e( 'To redirect to a post you can use the post_id, e.g. "100".', '' ); ?></p>
                         </td>
                     </tr>
