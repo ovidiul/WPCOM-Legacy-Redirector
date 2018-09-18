@@ -61,13 +61,13 @@ class WPCOM_Legacy_Redirector {
 		$args = array(
 			'labels'             => $labels,
 			'public'             => true,
-			'rewrite'            => array( 'slug' => 'book' ),
+			'rewrite'            => array( 'slug' => 'vip-legacy-redirect' ),
 			'capability_type'    => 'post',
 			'hierarchical'       => false,
 			'menu_position'      => 100,
 			'capabilities'       => array( 'create_posts' => 'do_not_allow' ),
 			'map_meta_cap'       => true,
-			'menu_icon'          => 'dashicons-external',
+			'menu_icon'          => 'dashicons-randomize',
 			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 		);
 		register_post_type( self::POST_TYPE, $args );
@@ -81,8 +81,11 @@ class WPCOM_Legacy_Redirector {
 			wpcom_vip_add_role_caps( 'administrator', $cap );
 			wpcom_vip_add_role_caps( 'editor', $cap );
 		} else {
-			$role = get_role( 'editor' );
-			$role->add_cap( $cap );
+			$roles = array( 'administrator', 'editor' );
+			foreach ( $roles as $role ) {
+				$role_obj = get_role( $role );
+				$role_obj->add_cap( $cap );
+			}
 		}
 	}
 

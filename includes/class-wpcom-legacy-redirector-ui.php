@@ -14,7 +14,6 @@ class WPCOM_Legacy_Redirector_UI {
 		add_filter( 'post_row_actions', array( $this, 'modify_list_row_actions' ), 10, 2 );
 		add_filter( 'removable_query_args', array( $this, 'add_removable_arg' ) );
 		add_filter( 'views_edit-vip-legacy-redirect', array( $this, 'vip_redirects_custom_post_status_filters' ) );
-
 	}
 	/**
 	 * Add Submenu Page.
@@ -257,12 +256,10 @@ class WPCOM_Legacy_Redirector_UI {
 			}
 		}
 	}
-
 	public function add_redirect_validation() {
 		if ( ! current_user_can( 'manage_redirects' ) ) {
 			return;
 		}
-
 		$errors   = array();
 		$messages = array();
 		if ( class_exists( 'WPCOM_Legacy_Redirector' ) ) {
