@@ -230,16 +230,8 @@ class WPCOM_Legacy_Redirector {
 
 		$url_hash = self::get_url_hash( $url );
 
-		// Allow plugins to disable lowercase. Check in case we transform to lowercase.
-		if ( apply_filters( 'wpcom_legacy_redirector_check_lowercase', true ) ) {
-			$lowercase_url_hash = self::get_url_hash( self::lowercase( $url ) );
-			$select_query       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND (post_name = %s OR post_name = %s) LIMIT 1", self::POST_TYPE, $url_hash, $lowercase_url_hash );
-		} else {
-			$select_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash );
-		}
-
-		$redirect_post_id = $wpdb->get_var( $select_query );
-
+		$redirect_post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_name = %s LIMIT 1", self::POST_TYPE, $url_hash ) );
+		
 		if ( ! $redirect_post_id ) {
 			$redirect_post_id = 0;
 		}
@@ -292,12 +284,6 @@ class WPCOM_Legacy_Redirector {
 		// Only append '?' and the query if there is one
 		if ( ! empty( $components['query'] ) ) {
 			$normalised_url = $components['path'] . '?' . $components['query'];
-		}
-
-		// Allow plugins to disable lowercase.
-		if ( apply_filters( 'wpcom_legacy_redirector_check_lowercase', true ) ) {
-			// Transform to lowercase.
-			$normalised_url = self::lowercase( $normalised_url );
 		}
 
 		return $normalised_url;
