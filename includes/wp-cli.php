@@ -222,20 +222,28 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	 *   - csv
 	 * ---
 	 *
+	 * [--dry_run]
 	 * [--verbose]
 	 *
 	 * @subcommand import-from-csv
-	 * @synopsis --csv=<path-to-csv> [--format=<format>] [--verbose]
+	 * @synopsis --csv=<path-to-csv> [--format=<format>] [--dry_run] [--verbose]
 	 */
 	function import_from_csv( $args, $assoc_args ) {
 		define( 'WP_IMPORTING', true );
 		$format = \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' );
 		$csv = trim( \WP_CLI\Utils\get_flag_value( $assoc_args, 'csv' ) );
 		$verbose = isset( $assoc_args['verbose'] ) ? true : false;
+		$dry_run = isset( $assoc_args['dry_run'] ) ? true : false;
 		$notices = array();
 
 		if ( empty( $csv ) || ! file_exists( $csv ) ) {
 			WP_CLI::error( "Invalid 'csv' file" );
+		}
+
+		if ( true === $dry_run ) {
+			WP_CLI::line( "---Dry Run---" );
+		} else {
+			WP_CLI::line( "---Live Run--" );
 		}
 
 		if ( ! $verbose ) {
@@ -249,27 +257,31 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				$row++;
 				$redirect_from = $data[ 0 ];
 				$redirect_to = $data[ 1 ];
-				if ( $verbose ) {
+				if ( $dry_run ) {
+					WP_CLI::line( "(CSV) Redirect would be added for {$redirect_from} to {$redirect_to} at $row" );
+				} elseif ( $verbose ) {
 					WP_CLI::line( "Adding (CSV) redirect for {$redirect_from} to {$redirect_to}" );
 					WP_CLI::line( "-- at $row" );
 				} elseif ( 0 == $row % 100 ) {
 					WP_CLI::line( "Processing row $row" );
 				}
 
-				$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to );
-				if ( ! $inserted || is_wp_error( $inserted ) ) {
-					$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
-					$notices[] = array(
-						'redirect_from' => $redirect_from,
-						'redirect_to'   => $redirect_to,
-						'message'       => $failure_message,
-					);
-				} elseif ( $verbose ) {
-					$notices[] = array(
-						'redirect_from' => $redirect_from,
-						'redirect_to'   => $redirect_to,
-						'message'       => 'Successfully imported',
-					);
+				if ( $dry_run === false ) {
+					$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to );
+					if ( ! $inserted || is_wp_error( $inserted ) ) {
+						$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
+						$notices[] = array(
+							'redirect_from' => $redirect_from,
+							'redirect_to'   => $redirect_to,
+							'message'       => $failure_message,
+						);
+					} elseif ( $verbose ) {
+						$notices[] = array(
+							'redirect_from' => $redirect_from,
+							'redirect_to'   => $redirect_to,
+							'message'       => 'Successfully imported',
+						);
+					}
 				}
 
 				if ( 0 == $row % 100 ) {
