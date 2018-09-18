@@ -275,25 +275,12 @@ class WPCOM_Legacy_Redirector_UI {
 				} else {
 					$from_url	= sanitize_text_field( $_POST['from_url'] );
 					$redirect_to = sanitize_text_field( $_POST['redirect_to'] );
-
-					// Check if $from_url is not a 404.  Only 404 links are redirected in this plugin.
-					$status = $this->check_if_404( home_url() . $from_url );
-					if ( 404 !== $status ) {
-						$from_url = '';
-					}
-
 					if ( WPCOM_Legacy_Redirector::validate( $from_url, $redirect_to ) ) {
 						$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $redirect_to, false );
 						if ( true === $output ) {
 							$link	   = '<a href="' . esc_url( $from_url ) . '" target="_blank">' . esc_url( $from_url ) . '</a>';
 							$messages[] = __( 'The redirect was added successfully. Check Redirect: ', 'wpcom-legacy-redirector' ) . $link;
-						} else {
-							if ( false === $output ) {
-								$errors[] = array(
-									'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
-									'message' => __( 'Redirect could not be saved. Contact administrator and check permissions.', 'wpcom-legacy-redirector' ),
-								);
-							} elseif ( is_wp_error( $output ) ) {
+						} elseif ( is_wp_error( $output ) ) {
 								foreach ( $output->get_error_messages() as $error ) {
 									$errors[] = array(
 										'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
@@ -301,15 +288,7 @@ class WPCOM_Legacy_Redirector_UI {
 									);
 								}
 							}
-						}
 					} else {
-						if ( $from_url === '' ) {
-							$errors[] = array(
-								'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
-								'message' => __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' ),
-							);
-							$output = false;
-						} else {
 							$errors[] = array(
 								'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
 								'message' => __( 'Check the values you are using to save the redirect. All fields are required. "Redirect From" and "Redirect To" should not match.', 'wpcom-legacy-redirector' ),
@@ -317,15 +296,9 @@ class WPCOM_Legacy_Redirector_UI {
 						}
 					}
 				}
-			}
-		} else {
-			$errors[] = array(
-				'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
-				'message' => __( 'WPCOM Legacy Redirector plugin is required to add redirects.', 'wpcom-legacy-redirector' ),
-			);
+			
 		}
 		return array( $errors, $messages );
-
 	}
 
 	public function generate_page_html() {
@@ -336,14 +309,14 @@ class WPCOM_Legacy_Redirector_UI {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?></h1>
-			<?php if ( count( $messages ) ) : ?>
+			<?php if ( !empty( $messages ) ) : ?>
 				<div class="notice notice-success">
 					<?php foreach ( $messages as $message ) : ?>
 						<p><?php echo wp_kses_post( $message ); ?></p>
 					<?php endforeach; ?>
 				</div>
 			<?php endif; ?>
-			<?php if ( count( $errors ) ) : ?>
+			<?php if ( !empty( $errors ) ) : ?>
 				<div class="notice notice-error">
 					<?php foreach ( $errors as $error ) : ?>
 						<p><strong><?php echo esc_html( $error['label'] ); ?></strong>: <?php echo esc_html( $error['message'] ); ?></p>

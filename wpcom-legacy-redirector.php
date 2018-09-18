@@ -134,15 +134,21 @@ class WPCOM_Legacy_Redirector {
 			return $from_url;
 		}
 
+		$from_url_hash = self::get_url_hash( $from_url );
+		if ( false !== self::get_redirect_uri( $from_url ) ) {
+			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
+		}
 		if ( $validate && false === self::validate( $from_url, $redirect_to ) ) {
 			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wpcom-legacy-redirector' );
 			return new WP_Error( 'invalid-values', $message );
 		}
-
-		$from_url_hash = self::get_url_hash( $from_url );
-
-		if ( false !== self::get_redirect_uri( $from_url ) ) {
-			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
+		if ( 404 !== absint( self::check_if_404( home_url() . $from_url ) ) ) {
+			$message = __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'non-404', $message );
+		}
+		if ( 'private' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
+			$message = __( 'You are trying to redirect to a page that is currently not public.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'non-public', $message );
 		}
 
 		$args = array(
