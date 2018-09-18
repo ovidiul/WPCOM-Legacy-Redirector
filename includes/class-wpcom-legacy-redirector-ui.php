@@ -108,25 +108,6 @@ class WPCOM_Legacy_Redirector_UI {
 		}
 	}
 	/**
-	 * Check if $redirect is a public Post.
-	 */
-	public function vip_legacy_redirect_check_if_public( $excerpt ) {
-
-		$redirect = home_url() . $excerpt;
-		$post_types = get_post_types();
-
-		if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
-			$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
-		} else {
-			$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
-		}
-		if ( ! is_null( $post_obj ) ) {
-			if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
-				return 'private';
-			}
-		}
-	}
-	/**
 	 * Add the data to the custom columns for the vip-legacy-redirects post type.
 	 * Provide warnings for possibly bad redirects.
 	 *
@@ -151,7 +132,7 @@ class WPCOM_Legacy_Redirector_UI {
 					} elseif ( 0 === strpos( $excerpt, 'http' ) ) {
 						echo esc_url_raw( $excerpt );
 					} else {
-						if ( 'private' === $this->vip_legacy_redirect_check_if_public( $excerpt ) ) {
+						if ( 'private' === WPCOM_Legacy_Redirector::vip_legacy_redirect_check_if_public( $excerpt ) ) {
 							echo esc_html( $excerpt ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>';
 						} else {
 							echo esc_html( $excerpt );
@@ -207,24 +188,6 @@ class WPCOM_Legacy_Redirector_UI {
 		return $actions;
 	}
 	/**
-	 * Check if URL is a 404.
-	 *
-	 * @param string $url The URL.
-	 */
-	public function check_if_404( $url ) {
-
-		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$response = vip_safe_wp_remote_get( $url );
-		} else {
-			$response = wp_remote_get( $url );
-		}
-		$response_code = '';
-		if ( is_array( $response ) ) {
-			$response_code = wp_remote_retrieve_response_code( $response );
-		}
-		return $response_code;
-	}
-	/**
 	 * 
 	 */
 	public function vip_legacy_redirect_sendback( $validate, $post_id ) {
@@ -259,7 +222,7 @@ class WPCOM_Legacy_Redirector_UI {
 						$redirect = $excerpt;
 					} elseif ( '/' === $excerpt ) {
 						$redirect = 'valid';
-					} elseif ( 'private' === $this->vip_legacy_redirect_check_if_public( $excerpt ) ) {
+					} elseif ( 'private' === WPCOM_Legacy_Redirector::vip_legacy_redirect_check_if_public( $excerpt ) ) {
 						$redirect = 'private';
 					} else {
 						$redirect = home_url() . $excerpt;
@@ -269,7 +232,7 @@ class WPCOM_Legacy_Redirector_UI {
 					// Post Parent IDs are always internal redirects.
 					$redirect = $this->vip_legacy_redirect_parent_id( $post );
 				}
-				$status = $this->check_if_404( $redirect );
+				$status = WPCOM_Legacy_Redirector::check_if_404( $redirect );
 
 				// Check if $redirect is invalid.
 				if ( ! wp_validate_redirect( $redirect, false ) ) {

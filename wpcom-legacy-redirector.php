@@ -322,6 +322,45 @@ class WPCOM_Legacy_Redirector {
 	public static function validate( $from_url, $redirect_to ) {
 		return ( ! empty( $from_url ) && ! empty( $redirect_to ) && self::transform( $from_url ) !== self::transform( $redirect_to ) );
 	}
+	/**
+	 * Check if URL is a 404.
+	 *
+	 * @param string $url The URL.
+	 */
+	public static function check_if_404( $url ) {
+		// print_r($url);
+		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
+			$response = vip_safe_wp_remote_get( $url );
+		} else {
+			$response = wp_remote_get( $url );
+		}
+		$response_code = '';
+		if ( is_array( $response ) ) {
+			$response_code = wp_remote_retrieve_response_code( $response );
+			
+		}
+		// print_r($response_code);
+		return $response_code;
+	}
+	/**
+	 * Check if $redirect is a public Post.
+	 */
+	public static function vip_legacy_redirect_check_if_public( $excerpt ) {
+
+		$post_types = get_post_types();
+
+		if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
+			$post_obj = wpcom_vip_get_page_by_path( $excerpt, OBJECT, $post_types );
+		} else {
+			$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
+		}
+		// print_r( get_post_status( $post_obj->ID ) );
+		if ( ! is_null( $post_obj ) ) {
+			if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
+				return 'private';
+			}
+		}
+	}
 }
 
 WPCOM_Legacy_Redirector::start();
