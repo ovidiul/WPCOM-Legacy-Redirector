@@ -159,6 +159,14 @@ class WPCOM_Legacy_Redirector {
 			$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wpcom-legacy-redirector' );
 			return new WP_Error( 'non-public', $message );
 		}
+		if ( 'null' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
+			$message = __( 'You are trying to redirect to a URL that does not exist.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'non-public', $message );
+		}
+		if ( false !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
+			$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'empty-postid', $message );
+		}
 
 		$args = array(
 			'post_name' => $from_url_hash,
@@ -358,11 +366,14 @@ class WPCOM_Legacy_Redirector {
 		} else {
 			$post_obj = get_page_by_path( $excerpt, OBJECT, $post_types );
 		}
-		// print_r( get_post_status( $post_obj->ID ) );
 		if ( ! is_null( $post_obj ) ) {
 			if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
 				return 'private';
 			}
+		} else {
+			return 'null';
+		}
+	}
 	/**
 	 * Get the redirect URL to pass on to validate.
 	 * We look for the excerpt, root, check if private, and check post parent IDs
