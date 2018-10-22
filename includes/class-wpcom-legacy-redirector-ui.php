@@ -272,9 +272,16 @@ class WPCOM_Legacy_Redirector_UI {
 		?>
 		<style>
 		#from_url_value:not(:empty), #redirect_to_value:not(:empty) {
-    	margin-top: -17px;
-		color: #949494;
-		}		
+			color: #949494;
+			float: left;
+			width: 100%;
+			margin-top: -17px;
+		}
+		@media (max-width: 782px) {
+			#from_url_value:not(:empty), #redirect_to_value:not(:empty) {
+				margin-top: 0px;
+			}
+		}
 		</style>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?></h1>
