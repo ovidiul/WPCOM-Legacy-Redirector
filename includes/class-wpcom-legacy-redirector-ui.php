@@ -189,32 +189,11 @@ class WPCOM_Legacy_Redirector_UI {
 	public function validate_vip_legacy_redirect() {
 
 		if ( isset( $_GET['action'] ) && 'validate' === $_GET['action'] ) {
-			$nonce = $_REQUEST['_validate_redirect'];
 			$post = get_post( $_GET['post'] );
 			if ( ! isset( $_REQUEST['_validate_redirect'] ) || ! wp_verify_nonce( $_REQUEST['_validate_redirect'], 'validate_vip_legacy_redirect' ) ) {
 				return;
 			} else {
-				// Check if the Redirect is stored in the Excerpt instead of in the Post Parent as an ID.
-				// Excerpts can be both external or internal redirects.
-				if ( has_excerpt( $post->ID ) ) {
-					$post_types = get_post_types();
-					$excerpt = get_the_excerpt( $post->ID );
-
-					// Check if redirect is a full URL or not.
-					if ( 0 === strpos( $excerpt, 'http' ) ) {
-						$redirect = $excerpt;
-					} elseif ( '/' === $excerpt ) {
-						$redirect = 'valid';
-					} elseif ( 'private' === WPCOM_Legacy_Redirector::vip_legacy_redirect_check_if_public( $excerpt ) ) {
-						$redirect = 'private';
-					} else {
-						$redirect = home_url() . $excerpt;
-					}
-				} else {
-					// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
-					// Post Parent IDs are always internal redirects.
-					$redirect = $this->vip_legacy_redirect_parent_id( $post );
-				}
+				$redirect = WPCOM_Legacy_Redirector::get_redirect($post);
 				$status = WPCOM_Legacy_Redirector::check_if_404( $redirect );
 
 				// Check if $redirect is invalid.
