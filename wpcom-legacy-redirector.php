@@ -156,7 +156,7 @@ class WPCOM_Legacy_Redirector {
 			return new WP_Error( 'non-404', $message );
 		}
 		if ( 'private' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
-			$message = __( 'You are trying to redirect to a page that is currently not public.', 'wpcom-legacy-redirector' );
+			$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wpcom-legacy-redirector' );
 			return new WP_Error( 'non-public', $message );
 		}
 
