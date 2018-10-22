@@ -116,7 +116,7 @@ class WPCOM_Legacy_Redirector {
 			}
 		}
 	}
-	function wpcom_legacy_add_redirect_js( $hook ) {
+	public static function wpcom_legacy_add_redirect_js( $hook ) {
         if( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
                 return;
 		}
