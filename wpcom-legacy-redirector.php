@@ -364,6 +364,36 @@ class WPCOM_Legacy_Redirector {
 				return 'private';
 			}
 	/**
+	 * Get the redirect URL to pass on to validate.
+	 * We look for the excerpt, root, check if private, and check post parent IDs
+	 */
+	public static function get_redirect( $post ) {		
+		if ( has_excerpt( $post->ID ) ) {
+			$excerpt = get_the_excerpt( $post->ID );
+
+			// Check if redirect is a full URL or not.
+			if ( 0 === strpos( $excerpt, 'http' ) ) {
+				$redirect = $excerpt;
+			} elseif ( '/' === $excerpt ) {
+				$redirect = 'valid';
+			} elseif ( 'private' === WPCOM_Legacy_Redirector::vip_legacy_redirect_check_if_public( $excerpt ) ) {
+				$redirect = 'private';
+			} else {
+				$redirect = home_url() . $excerpt;
+			}
+		} else {
+			// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
+			// Post Parent IDs are always internal redirects.
+			$redirect = self::vip_legacy_redirect_parent_id( $post );
+		}
+		return $redirect;
+	}
+	public static function check_if_excerpt_is_home( $excerpt ) {
+		if ( '/' === $excerpt || home_url() === $excerpt ) {
+			return true;
+		}
+	}
+	/**
 	 * Run checks for the Post Parent ID of the redirect.
 	 *
 	 * @param object $post The Post.
