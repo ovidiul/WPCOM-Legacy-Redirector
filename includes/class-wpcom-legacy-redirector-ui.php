@@ -101,13 +101,13 @@ class WPCOM_Legacy_Redirector_UI {
 				break;
 			case 'to':
 				$post = get_post( $post_id );
-				$post_types = get_post_types();
 				$excerpt = get_the_excerpt( $post_id );
+				$parent = get_post( $post->post_parent );
 
 				// Check if the Post is Published.
 				if ( ! empty( $excerpt ) ) {
 					// Check if it's the Home URL
-					if ( '/' === $excerpt || home_url() === $excerpt ) {
+					if ( true === WPCOM_Legacy_Redirector::check_if_excerpt_is_home( $excerpt ) ) {
 						echo esc_html( $excerpt );
 					} elseif ( 0 === strpos( $excerpt, 'http' ) ) {
 						echo esc_url_raw( $excerpt );
