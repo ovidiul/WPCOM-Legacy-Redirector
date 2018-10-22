@@ -363,6 +363,26 @@ class WPCOM_Legacy_Redirector {
 			if ( 'publish' !== get_post_status( $post_obj->ID ) ) {
 				return 'private';
 			}
+	/**
+	 * Run checks for the Post Parent ID of the redirect.
+	 *
+	 * @param object $post The Post.
+	 */
+	public static function vip_legacy_redirect_parent_id( $post ) {
+		if ( isset( $_POST['redirect_to'] ) && true !== self::check_if_excerpt_is_home( $post ) ) {
+			if ( null !== get_post( $post ) ) {
+				return false;
+			}
+		} else {
+			$parent = get_post( $post->post_parent );
+			if ( null === get_post( $post->post_parent ) ) {
+				return false;
+			} elseif ( 'publish' !== get_post_status( $parent ) ) {
+				return 'private';
+			} else {
+				$parent_slug = $parent->post_name;
+				return $parent_slug;
+			}
 		}
 	}
 }

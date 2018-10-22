@@ -88,25 +88,6 @@ class WPCOM_Legacy_Redirector_UI {
 		return $views;
 	}
 	/**
-	 * Run checks for the Post Parent ID of the redirect.
-	 *
-	 * @param object $post The Post.
-	 */
-	public function vip_legacy_redirect_parent_id( $post ) {
-		$post = get_post( $post->ID );
-		$parent = get_post( $post->post_parent );
-		$parent_post_status = get_post_status( $parent );
-
-		if ( is_null( get_post( $post->post_parent ) ) ) {
-			return 'null';
-		} elseif ( 'publish' !== get_post_status( $parent ) ) {
-			return 'private';
-		} else {
-			$parent_slug = $parent->post_name;
-			return $parent_slug;
-		}
-	}
-	/**
 	 * Add the data to the custom columns for the vip-legacy-redirects post type.
 	 * Provide warnings for possibly bad redirects.
 	 *
@@ -138,12 +119,15 @@ class WPCOM_Legacy_Redirector_UI {
 						}
 					}
 				} else {
-					if ( 'null' === $this->vip_legacy_redirect_parent_id( $post ) ) {
-						echo '<em>' . esc_html__( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</em>';
-					} elseif ( 'private' === $this->vip_legacy_redirect_parent_id( $post ) ) {
-						echo ( esc_html( get_permalink( $parent ) ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>' );
-					} else {
-						echo esc_html( '/' . $this->vip_legacy_redirect_parent_id( $post ) );
+					switch( WPCOM_Legacy_Redirector::vip_legacy_redirect_parent_id( $post ) ) {
+						case false:
+							echo '<em>' . esc_html__( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' ) . '</em>';
+							break;
+						case 'private':
+							echo ( esc_html( get_permalink( $parent ) ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>' );
+							break;
+						default:
+							echo esc_html( '/' . WPCOM_Legacy_Redirector::vip_legacy_redirect_parent_id( $post ) );
 					}
 				}
 				break;
