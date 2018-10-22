@@ -252,14 +252,13 @@ class WPCOM_Legacy_Redirector_UI {
 								}
 							}
 					} else {
-							$errors[] = array(
-								'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
-								'message' => __( 'Check the values you are using to save the redirect. All fields are required. "Redirect From" and "Redirect To" should not match.', 'wpcom-legacy-redirector' ),
-							);
-						}
+						$errors[] = array(
+							'label'   => __( 'Error', 'wpcom-legacy-redirector' ),
+							'message' => __( 'Check the values you are using to save the redirect. All fields are required. "Redirect From" and "Redirect To" should not match.', 'wpcom-legacy-redirector' ),
+						);
 					}
 				}
-			
+			}
 		}
 		return array( $errors, $messages );
 	}
