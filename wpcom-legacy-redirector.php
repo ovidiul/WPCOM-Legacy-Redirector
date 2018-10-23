@@ -8,8 +8,6 @@
  * Author: Automattic / WordPress.com VIP
  * Author URI: https://vip.wordpress.com
  *
- * This is a no-frills plugin (no UI, for example). Data entry needs to be bulk-loaded via the wp-cli commands provided or custom scripts.
- *
  * Redirects are stored as a custom post type and use the following fields:
  *
  * - post_name for the md5 hash of the "from" path or URL.
@@ -116,6 +114,11 @@ class WPCOM_Legacy_Redirector {
 			}
 		}
 	}
+	/**
+	 * Enqueue the JS that builds the link previews.
+	 * 
+	 * @param string $hook Get the current page hook.
+	 */
 	public static function wpcom_legacy_add_redirect_js( $hook ) {
         if( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
                 return;
@@ -356,6 +359,8 @@ class WPCOM_Legacy_Redirector {
 	}
 	/**
 	 * Check if $redirect is a public Post.
+	 * 
+	 * @param string $excerpt The Excerpt.
 	 */
 	public static function vip_legacy_redirect_check_if_public( $excerpt ) {
 
@@ -377,6 +382,8 @@ class WPCOM_Legacy_Redirector {
 	/**
 	 * Get the redirect URL to pass on to validate.
 	 * We look for the excerpt, root, check if private, and check post parent IDs
+	 * 
+	 * @param array $post The post array.
 	 */
 	public static function get_redirect( $post ) {		
 		if ( has_excerpt( $post->ID ) ) {
@@ -399,6 +406,11 @@ class WPCOM_Legacy_Redirector {
 		}
 		return $redirect;
 	}
+	/**
+	 * Check if the excerpt is the home URL.
+	 * 
+	 * @param string $excerpt The Excerpt of a post.
+	 */
 	public static function check_if_excerpt_is_home( $excerpt ) {
 		if ( '/' === $excerpt || home_url() === $excerpt ) {
 			return true;

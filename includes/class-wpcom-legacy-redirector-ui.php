@@ -171,7 +171,10 @@ class WPCOM_Legacy_Redirector_UI {
 		return $actions;
 	}
 	/**
+	 * Return error data when validate check fails.
 	 * 
+	 * @param string $validate String that passes back the validate result in order to output the right notice.
+	 * @param int $post_id The Post ID.
 	 */
 	public function vip_legacy_redirect_sendback( $validate, $post_id ) {
 		$sendback = remove_query_arg( array( 'validate', 'ids' ),  wp_get_referer() );
@@ -219,6 +222,9 @@ class WPCOM_Legacy_Redirector_UI {
 			}
 		}
 	}
+	/**
+	 * Validate the redirect that is being added.
+	 */
 	public function add_redirect_validation() {
 		if ( ! current_user_can( 'manage_redirects' ) ) {
 			return;
@@ -262,7 +268,9 @@ class WPCOM_Legacy_Redirector_UI {
 		}
 		return array( $errors, $messages );
 	}
-
+	/**
+	 * Generate the Add Redirect page.
+	 */
 	public function generate_page_html() {
 		$array = $this->add_redirect_validation();
 
