@@ -343,7 +343,7 @@ class WPCOM_Legacy_Redirector {
 	 * @param string $url The URL.
 	 */
 	public static function check_if_404( $url ) {
-		// print_r($url);
+		
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
 			$response = vip_safe_wp_remote_get( $url );
 		} else {
@@ -354,7 +354,6 @@ class WPCOM_Legacy_Redirector {
 			$response_code = wp_remote_retrieve_response_code( $response );
 			
 		}
-		// print_r($response_code);
 		return $response_code;
 	}
 	/**
