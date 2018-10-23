@@ -167,6 +167,11 @@ class WPCOM_Legacy_Redirector {
 				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
 				return new WP_Error( 'empty-postid', $message );
 			}
+		} else if ( false !== strpos( $redirect_to, 'http' ) ) {
+			if ( ! wp_validate_redirect( $redirect_to ) ) {
+				$message = __( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' );
+				return new WP_Error( 'non-public', $message );
+			}
 		} else {
 			if ( 'private' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
 				$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wpcom-legacy-redirector' );
