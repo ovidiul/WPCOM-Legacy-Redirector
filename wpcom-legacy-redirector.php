@@ -158,6 +158,10 @@ class WPCOM_Legacy_Redirector {
 			$message = __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' );
 			return new WP_Error( 'non-404', $message );
 		}
+		if ( 'private' === self::vip_legacy_redirect_check_if_public( $from_url ) ) {
+			$message = __( 'You are trying to redirect from a URL that is currently private.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'non-404', $message );
+		}
 		if ( is_numeric( $redirect_to ) ){
 			if ( false !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
 				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
