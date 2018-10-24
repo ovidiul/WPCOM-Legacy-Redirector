@@ -148,9 +148,15 @@ class WPCOM_Legacy_Redirector {
 		$from_url_hash = self::get_url_hash( $from_url );
 
 		if ( $validate ) {
-			return self::validate_urls( $from_url, $redirect_to );
+			$valid_urls = self::validate_urls( $from_url, $redirect_to );
+			if ( is_object($valid_urls) ) {
+				return $valid_urls;
+			} else {
+				$valid_urls[0] = $from_url;
+				$valid_urls[1] = $redirect_to;
+			}
 		}
-
+		
 		$args = array(
 			'post_name' => $from_url_hash,
 			'post_title' => $from_url,
