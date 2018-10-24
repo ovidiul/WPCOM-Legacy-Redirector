@@ -245,7 +245,7 @@ class WPCOM_Legacy_Redirector_UI {
 					$from_url	= sanitize_text_field( $_POST['from_url'] );
 					$redirect_to = sanitize_text_field( $_POST['redirect_to'] );
 					if ( WPCOM_Legacy_Redirector::validate( $from_url, $redirect_to ) ) {
-						$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $redirect_to, false );
+						$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $redirect_to, true );
 						if ( true === $output ) {
 							$link	   = '<a href="' . esc_url( $from_url ) . '" target="_blank">' . esc_url( $from_url ) . '</a>';
 							$messages[] = __( 'The redirect was added successfully. Check Redirect: ', 'wpcom-legacy-redirector' ) . $link;
