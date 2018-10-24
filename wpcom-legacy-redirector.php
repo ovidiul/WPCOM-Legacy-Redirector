@@ -194,7 +194,7 @@ class WPCOM_Legacy_Redirector {
 				$message = __( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' );
 				return new WP_Error( 'external-url-not-allowed', $message );
 			}
-			return true;
+			return array( $from_url, $redirect_to );
 		}
 		if ( false !== self::get_redirect_uri( $from_url ) ) {
 			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
@@ -219,6 +219,7 @@ class WPCOM_Legacy_Redirector {
 			$message = __( 'You are trying to redirect to a URL that does not exist.', 'wpcom-legacy-redirector' );
 			return new WP_Error( 'invalid', $message );
 		}
+		return array( $from_url, $redirect_to );
 	}
 	static function get_redirect_uri( $url ) {
 
