@@ -186,7 +186,7 @@ class WPCOM_Legacy_Redirector {
 	 */
 	static function validate_urls( $from_url, $redirect_to ) {
 		if ( is_numeric( $redirect_to ) || false !== strpos( $redirect_to, 'http' ) ) {
-			if ( is_numeric( $redirect_to ) && false !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
+			if ( is_numeric( $redirect_to ) && true !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
 				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
 				return new WP_Error( 'empty-postid', $message );
 			}
@@ -451,8 +451,8 @@ class WPCOM_Legacy_Redirector {
 	 */
 	public static function vip_legacy_redirect_parent_id( $post ) {
 		if ( isset( $_POST['redirect_to'] ) && true !== self::check_if_excerpt_is_home( $post ) ) {
-			if ( null !== get_post( $post ) ) {
-				return false;
+			if ( null !== get_post( $post ) && 'publish' === get_post_status( $post ) ) {
+				return true;
 			}
 		} else {
 			$parent = get_post( $post->post_parent );
