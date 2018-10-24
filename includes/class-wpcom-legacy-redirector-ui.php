@@ -7,9 +7,7 @@ class WPCOM_Legacy_Redirector_UI {
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'validate_redirects_notices' ), 10, 2 );
 		add_action( 'manage_vip-legacy-redirect_posts_custom_column' , array( $this, 'custom_vip_legacy_redirect_column' ), 10, 2 );
-		add_action( 'load-edit.php', array( $this, 'default_show_excerpt_wp_table' ) );
 		add_action( 'after_setup_theme', array( $this, 'validate_vip_legacy_redirect' ), 10, 2 );
-
 		add_filter( 'manage_vip-legacy-redirect_posts_columns', array( $this, 'set_vip_legacy_redirects_columns' ) );
 		add_filter( 'post_row_actions', array( $this, 'modify_list_row_actions' ), 10, 2 );
 		add_filter( 'removable_query_args', array( $this, 'add_removable_arg' ) );
@@ -36,12 +34,6 @@ class WPCOM_Legacy_Redirector_UI {
 	public function add_removable_arg( $args ) {
 		array_push( $args, 'validate', 'ids' );
 		return $args;
-	}
-	/**
-	 * Always show UI with Excerpts.
-	 */
-	public function default_show_excerpt_wp_table() {
-		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : '';
 	}
 	/**
 	 * Notices for the redirect validation.
