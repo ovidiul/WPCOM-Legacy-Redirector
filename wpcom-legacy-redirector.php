@@ -145,42 +145,10 @@ class WPCOM_Legacy_Redirector {
 		if ( is_wp_error( $from_url ) ) {
 			return $from_url;
 		}
-
 		$from_url_hash = self::get_url_hash( $from_url );
-		if ( false !== self::get_redirect_uri( $from_url ) ) {
-			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
-		}
-		if ( $validate && false === self::validate( $from_url, $redirect_to ) ) {
-			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wpcom-legacy-redirector' );
-			return new WP_Error( 'invalid-values', $message );
-		}
-		if ( 404 !== absint( self::check_if_404( home_url() . $from_url ) ) ) {
-			$message = __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' );
-			return new WP_Error( 'non-404', $message );
-		}
-		if ( 'private' === self::vip_legacy_redirect_check_if_public( $from_url ) ) {
-			$message = __( 'You are trying to redirect from a URL that is currently private.', 'wpcom-legacy-redirector' );
-			return new WP_Error( 'non-404', $message );
-		}
-		if ( is_numeric( $redirect_to ) ){
-			if ( false !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
-				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
-				return new WP_Error( 'empty-postid', $message );
-			}
-		} else if ( false !== strpos( $redirect_to, 'http' ) ) {
-			if ( ! wp_validate_redirect( $redirect_to ) ) {
-				$message = __( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' );
-				return new WP_Error( 'non-public', $message );
-			}
-		} else {
-			if ( 'private' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
-				$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wpcom-legacy-redirector' );
-				return new WP_Error( 'non-public', $message );
-			}
-			if ( 'null' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
-				$message = __( 'You are trying to redirect to a URL that does not exist.', 'wpcom-legacy-redirector' );
-				return new WP_Error( 'non-public', $message );
-			}
+
+		if ( $validate ) {
+			return self::validate_urls( $from_url, $redirect_to );
 		}
 
 		$args = array(
@@ -203,7 +171,49 @@ class WPCOM_Legacy_Redirector {
 
 		return true;
 	}
-
+	/**
+	 * Validate the URLs
+	 * 
+	 * @param string $from_url
+	 * @param string $redirect_to
+	 * * @param bool $validate          Validate $from_url and $redirect_to values.
+	 */
+	static function validate_urls( $from_url, $redirect_to ) {
+		if ( is_numeric( $redirect_to ) || false !== strpos( $redirect_to, 'http' ) ) {
+			if ( is_numeric( $redirect_to ) && false !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
+				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
+				return new WP_Error( 'empty-postid', $message );
+			}
+			if ( ! wp_validate_redirect( $redirect_to ) ) {
+				$message = __( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' );
+				return new WP_Error( 'external-url-not-allowed', $message );
+			}
+			return true;
+		}
+		if ( false !== self::get_redirect_uri( $from_url ) ) {
+			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
+		}
+		if ( false === self::validate( $from_url, $redirect_to ) ) {
+			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'invalid-values', $message );
+		}
+		if ( 404 !== absint( self::check_if_404( home_url() . $from_url ) ) ) {
+			$message = __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'non-404', $message );
+		}
+		if ( 'private' === self::vip_legacy_redirect_check_if_public( $from_url ) ) {
+			$message = __( 'You are trying to redirect from a URL that is currently private.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'private-url', $message );
+		}
+		if ( 'private' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
+			$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'non-public', $message );
+		}
+		if ( 'null' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
+			$message = __( 'You are trying to redirect to a URL that does not exist.', 'wpcom-legacy-redirector' );
+			return new WP_Error( 'invalid', $message );
+		}
+	}
 	static function get_redirect_uri( $url ) {
 
 		$url = self::normalise_url( $url );
