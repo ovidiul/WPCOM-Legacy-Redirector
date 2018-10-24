@@ -225,13 +225,14 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	 * [--verbose]
 	 *
 	 * @subcommand import-from-csv
-	 * @synopsis --csv=<path-to-csv> [--format=<format>] [--verbose]
+	 * @synopsis --csv=<path-to-csv> [--format=<format>] [--verbose] [--skip-validation]
 	 */
 	function import_from_csv( $args, $assoc_args ) {
 		define( 'WP_IMPORTING', true );
 		$format = \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' );
 		$csv = trim( \WP_CLI\Utils\get_flag_value( $assoc_args, 'csv' ) );
 		$verbose = isset( $assoc_args['verbose'] ) ? true : false;
+		$validate = isset( $assoc_args['skip-validation'] ) ? false : true;
 		$notices = array();
 
 		if ( empty( $csv ) || ! file_exists( $csv ) ) {
@@ -256,7 +257,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 					WP_CLI::line( "Processing row $row" );
 				}
 
-				$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to );
+				$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to, $validate );
 				if ( ! $inserted || is_wp_error( $inserted ) ) {
 					$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
 					$notices[] = array(
