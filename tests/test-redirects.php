@@ -49,7 +49,7 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 	 * @dataProvider get_redirect_data
 	 */
 	function test_redirect( $from, $to ) {
-		$redirect = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to );
+		$redirect = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
 		$this->assertTrue( $redirect, 'insert_legacy_redirect failed' );
 
 		$redirect = WPCOM_Legacy_Redirector::get_redirect_uri( $from );
@@ -110,7 +110,7 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 			return $preserved_params;
 		} );
 
-		$redirect = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to );
+		$redirect = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
 		$this->assertTrue( $redirect, 'insert_legacy_redirect failed' );
 
 		$redirect = WPCOM_Legacy_Redirector::get_redirect_uri( $protected_from );
