@@ -223,7 +223,6 @@ class WPCOM_Legacy_Redirector_UI {
 		}
 		$errors   = array();
 		$messages = array();
-		if ( class_exists( 'WPCOM_Legacy_Redirector' ) ) {
 			if ( isset( $_POST['from_url'] ) && isset( $_POST['redirect_to'] ) ) {
 				if (
 					! isset( $_POST['redirect_nonce_field'] )
@@ -257,7 +256,6 @@ class WPCOM_Legacy_Redirector_UI {
 					}
 				}
 			}
-		}
 		return array( $errors, $messages );
 	}
 	/**
