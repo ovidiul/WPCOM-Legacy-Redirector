@@ -1,6 +1,6 @@
-# WPCOM Legacy Redirector
+# WP Redirect Manager
 
-WordPress plugin for handling legacy redirects in a scalable manner.
+Simple plugin for handling 404 redirects in a scalable manner.
 
 This is a no-frills plugin (no UI, for example). Data entry needs to be bulk-loaded via the wp-cli commands provided or custom scripts.
 
@@ -13,6 +13,6 @@ Redirects are stored as a custom post type and use the following fields:
   - `post_parent` if we're redirect to a post; or
   - `post_excerpt` if we're redirecting to an alternate URL.
 
-For detailed documentation, please see https://vip.wordpress.com/plugins/wpcom-legacy-redirector/
+For detailed documentation, please see https://vip.wordpress.com/plugins/wp-redirect-manager/
 
 Please contact us before using this plugin.

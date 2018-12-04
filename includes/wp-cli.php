@@ -1,6 +1,6 @@
 <?php
 
-class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
+class WP_Redirect_Manager_CLI extends WP_CLI_Command {
 
 	/**
 	 * Find domains redirected to, useful to populate the allowed_redirect_hosts filter.
@@ -18,7 +18,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 		$total_redirects = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT( ID ) FROM $wpdb->posts WHERE post_type = %s AND post_excerpt LIKE %s",
-				WPCOM_Legacy_Redirector::POST_TYPE,
+				WP_Redirect_Manager::POST_TYPE,
 				'http%'
 			)
 		);
@@ -28,7 +28,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 			$redirect_urls = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT post_excerpt FROM $wpdb->posts WHERE post_type = %s AND post_excerpt LIKE %s ORDER BY ID ASC LIMIT %d, %d",
-					WPCOM_Legacy_Redirector::POST_TYPE,
+					WP_Redirect_Manager::POST_TYPE,
 					'http%',
 					( $paged * $posts_per_page ),
 					$posts_per_page
@@ -156,7 +156,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				$i++;
 				$progress->tick();
 
-				if ( true === $skip_dupes && 0 !== WPCOM_Legacy_Redirector::get_redirect_post_id( parse_url( $redirect->meta_value, PHP_URL_PATH ) ) ) {
+				if ( true === $skip_dupes && 0 !== WP_Redirect_Manager::get_redirect_post_id( parse_url( $redirect->meta_value, PHP_URL_PATH ) ) ) {
 					if ( $verbose ) {
 						$notices[] = array(
 							'redirect_from' => $redirect->meta_value,
@@ -168,7 +168,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				}
 
 				if ( false === $dry_run ) {
-					$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect->meta_value, $redirect->post_id );
+					$inserted = WP_Redirect_Manager::insert_legacy_redirect( $redirect->meta_value, $redirect->post_id, false );
 					if ( ! $inserted || is_wp_error( $inserted ) ) {
 						$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
 						$notices[] = array(
@@ -292,4 +292,4 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 
 }
 
-WP_CLI::add_command( 'wpcom-legacy-redirector', 'WPCOM_Legacy_Redirector_CLI' );
+WP_CLI::add_command( 'wp-redirect-manager', 'WP_Redirect_Manager_CLI' );

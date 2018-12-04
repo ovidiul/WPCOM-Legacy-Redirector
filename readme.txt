@@ -1,4 +1,4 @@
-=== WPCOM Legacy Redirector ===
+=== WP Redirect Manager ===
 Contributors: automattic, wpcomvip, batmoo, betzster, davidbinda, olope, emrikol, philipjohn
 Tags: redirects, redirector, redirect
 Requires at least: 4.5
@@ -7,7 +7,7 @@ Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Simple plugin for handling legacy redirects in a scalable manner.
+Simple plugin for handling 404 redirects in a scalable manner.
 
 == Description ==
 

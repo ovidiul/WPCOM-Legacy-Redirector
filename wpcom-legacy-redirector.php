@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: WPCOM Legacy Redirector
- * Plugin URI: https://vip.wordpress.com/plugins/wpcom-legacy-redirector/
- * Description: Simple plugin for handling legacy redirects in a scalable manner.
- * Version: 1.2.0
+ * Plugin Name: WP Redirect Manager
+ * Plugin URI: https://vip.wordpress.com/plugins/wp-redirect-manager/
+ * Description: Simple plugin for handling 404 redirects in a scalable manner.
+ * Version: 1.4.0
  * Requires PHP: 5.6
  * Author: Automattic / WordPress.com VIP
  * Author URI: https://vip.wordpress.com
@@ -27,7 +27,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 
 require( __DIR__ . '/includes/class-wpcom-legacy-redirector-ui.php' );
 
-class WPCOM_Legacy_Redirector {
+class WP_Redirect_Manager {
 	const POST_TYPE = 'vip-legacy-redirect';
 	const CACHE_GROUP = 'vip-legacy-redirect-2';
 
@@ -35,27 +35,27 @@ class WPCOM_Legacy_Redirector {
 		add_action( 'init', array( __CLASS__, 'init' ) );
 		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability') );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
-		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
-		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wpcom_legacy_add_redirect_js' ) );
+		add_action( 'admin_menu', array( new WP_Redirect_Manager_UI, 'admin_menu' ) );
+		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wp_redirect_manager_add_redirect_js' ) );
 
 	}
 
 	static function init() {
 		$labels = array(
-			'name'                  => _x( 'Redirect Manager', 'Post type general name', 'wpcom-legacy-redirector' ),
-			'singular_name'         => _x( 'Redirect Manager', 'Post type singular name', 'wpcom-legacy-redirector' ),
-			'menu_name'             => _x( 'Redirect Manager', 'Admin Menu text', 'wpcom-legacy-redirector' ),
-			'name_admin_bar'        => _x( 'Redirect Manager', 'Add New on Toolbar', 'wpcom-legacy-redirector' ),
-			'add_new'               => __( 'Add New', 'wpcom-legacy-redirector' ),
-			'add_new_item'          => __( 'Add New Redirect', 'wpcom-legacy-redirector' ),
-			'new_item'              => __( 'New Redirect', 'wpcom-legacy-redirector' ),
-			'all_items'             => __( 'All Redirects', 'wpcom-legacy-redirector' ),
-			'search_items'          => __( 'Search Redirects', 'wpcom-legacy-redirector' ),
-			'not_found'             => __( 'No redirects found.', 'wpcom-legacy-redirector' ),
-			'not_found_in_trash'    => __( 'No redirects found in Trash.', 'wpcom-legacy-redirector' ),
-			'filter_items_list'     => _x( 'Filter redirects list', 'Screen reader text for the filter links heading on the post type listing screen. Default “Filter posts list”/”Filter pages list”. Added in 4.4', 'wpcom-legacy-redirector' ),
-			'items_list_navigation' => _x( 'Redirect list navigation', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'wpcom-legacy-redirector' ),
-			'items_list'            => _x( 'Redirects list', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'wpcom-legacy-redirector' ),
+			'name'                  => _x( 'Redirect Manager', 'Post type general name', 'wp-redirect-manager' ),
+			'singular_name'         => _x( 'Redirect Manager', 'Post type singular name', 'wp-redirect-manager' ),
+			'menu_name'             => _x( 'Redirect Manager', 'Admin Menu text', 'wp-redirect-manager' ),
+			'name_admin_bar'        => _x( 'Redirect Manager', 'Add New on Toolbar', 'wp-redirect-manager' ),
+			'add_new'               => __( 'Add New', 'wp-redirect-manager' ),
+			'add_new_item'          => __( 'Add New Redirect', 'wp-redirect-manager' ),
+			'new_item'              => __( 'New Redirect', 'wp-redirect-manager' ),
+			'all_items'             => __( 'All Redirects', 'wp-redirect-manager' ),
+			'search_items'          => __( 'Search Redirects', 'wp-redirect-manager' ),
+			'not_found'             => __( 'No redirects found.', 'wp-redirect-manager' ),
+			'not_found_in_trash'    => __( 'No redirects found in Trash.', 'wp-redirect-manager' ),
+			'filter_items_list'     => _x( 'Filter redirects list', 'Screen reader text for the filter links heading on the post type listing screen. Default “Filter posts list”/”Filter pages list”. Added in 4.4', 'wp-redirect-manager' ),
+			'items_list_navigation' => _x( 'Redirect list navigation', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'wp-redirect-manager' ),
+			'items_list'            => _x( 'Redirects list', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'wp-redirect-manager' ),
 		);
 
 		$args = array(
@@ -101,14 +101,18 @@ class WPCOM_Legacy_Redirector {
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 			$url .= '?' . $_SERVER['QUERY_STRING'];
 		}
-
-		$request_path = apply_filters( 'wpcom_legacy_redirector_request_path', $url );
-
+		$request_path = apply_filters_deprecated( 'wpcom_legacy_redirector_request_path', array( $url ), '1.4.0', 'wp_redirect_manager_request_path' );
+		$request_path = apply_filters( 'wp_redirect_manager_request_path', $request_path );
+		
 		if ( $request_path ) {
 			$redirect_uri = self::get_redirect_uri( $request_path );
 			if ( $redirect_uri ) {
 				header( 'X-legacy-redirect: HIT' );
-				$redirect_status = apply_filters( 'wpcom_legacy_redirector_redirect_status', 301, $url );
+				if ( has_filter( 'wpcom_legacy_redirector_redirect_status' ) ) {
+					$redirect_status = apply_filters_deprecated( 'wpcom_legacy_redirector_redirect_status', array( 301, $url ), '1.4.0', 'wp_redirect_manager_status' );
+				} else {
+					$redirect_status = apply_filters( 'wp_redirect_manager_status', 301, $url );
+				}
 				wp_safe_redirect( $redirect_uri, $redirect_status );
 				exit;
 			}
@@ -119,8 +123,8 @@ class WPCOM_Legacy_Redirector {
 	 * 
 	 * @param string $hook Get the current page hook.
 	 */
-	public static function wpcom_legacy_add_redirect_js( $hook ) {
-        if( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
+	public static function wp_redirect_manager_add_redirect_js( $hook ) {
+        if( $hook !== 'vip-legacy-redirect_page_wp-redirect-manager' ) {
                 return;
 		}
 		wp_enqueue_script( 'admin-add-redirects', plugins_url( '/assets/js/admin-add-redirects.js', __FILE__ ), '' , '', true );
@@ -136,7 +140,7 @@ class WPCOM_Legacy_Redirector {
 	 */
 	static function insert_legacy_redirect( $from_url, $redirect_to, $validate = true ) {
 
-		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! is_admin() && ! apply_filters( 'wpcom_legacy_redirector_allow_insert', false ) ) {
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! is_admin() && false !== ( apply_filters_deprecated( 'wpcom_legacy_redirector_allow_insert', array( false ), 'wp_redirect_manager_allow_insert') || apply_filters( 'wp_redirect_manager_allow_insert', false ) ) ) {
 			// never run on the front end
 			return false;
 		}
@@ -186,12 +190,12 @@ class WPCOM_Legacy_Redirector {
 	 */
 	static function validate_urls( $from_url, $redirect_to ) {
 		if ( is_numeric( $redirect_to ) || false !== strpos( $redirect_to, 'http' ) ) {
-			if ( is_numeric( $redirect_to ) && true !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
-				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
+			if ( is_numeric( $redirect_to ) && true !== self::wp_redirect_manager_check_parent_id( $redirect_to ) ) {
+				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wp-redirect-manager' );
 				return new WP_Error( 'empty-postid', $message );
 			}
 			if ( ! wp_validate_redirect( $redirect_to ) ) {
-				$message = __( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wpcom-legacy-redirector' );
+				$message = __( 'If you are doing an external redirect, make sure you whitelist the domain using the "allowed_redirect_hosts" filter.', 'wp-redirect-manager' );
 				return new WP_Error( 'external-url-not-allowed', $message );
 			}
 			return array( $from_url, $redirect_to );
@@ -200,23 +204,23 @@ class WPCOM_Legacy_Redirector {
 			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
 		}
 		if ( false === self::validate( $from_url, $redirect_to ) ) {
-			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wpcom-legacy-redirector' );
+			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wp-redirect-manager' );
 			return new WP_Error( 'invalid-values', $message );
 		}
 		if ( 404 !== absint( self::check_if_404( home_url() . $from_url ) ) ) {
-			$message = __( 'Redirects need to be from URLs that have a 404 status.', 'wpcom-legacy-redirector' );
+			$message = __( 'Redirects need to be from URLs that have a 404 status.', 'wp-redirect-manager' );
 			return new WP_Error( 'non-404', $message );
 		}
-		if ( 'private' === self::vip_legacy_redirect_check_if_public( $from_url ) ) {
-			$message = __( 'You are trying to redirect from a URL that is currently private.', 'wpcom-legacy-redirector' );
+		if ( 'private' === self::wp_redirect_manager_check_if_public( $from_url ) ) {
+			$message = __( 'You are trying to redirect from a URL that is currently private.', 'wp-redirect-manager' );
 			return new WP_Error( 'private-url', $message );
 		}
-		if ( 'private' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
-			$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wpcom-legacy-redirector' );
+		if ( 'private' === self::wp_redirect_manager_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
+			$message = __( 'You are trying to redirect to a URL that is currently not public.', 'wp-redirect-manager' );
 			return new WP_Error( 'non-public', $message );
 		}
-		if ( 'null' === self::vip_legacy_redirect_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
-			$message = __( 'You are trying to redirect to a URL that does not exist.', 'wpcom-legacy-redirector' );
+		if ( 'null' === self::wp_redirect_manager_check_if_public( $redirect_to ) && '/' !== $redirect_to ) {
+			$message = __( 'You are trying to redirect to a URL that does not exist.', 'wp-redirect-manager' );
 			return new WP_Error( 'invalid', $message );
 		}
 		return array( $from_url, $redirect_to );
@@ -229,7 +233,11 @@ class WPCOM_Legacy_Redirector {
 		}
 
 		// White list of Params that should be pass through as is.
-		$protected_params = apply_filters( 'wpcom_legacy_redirector_preserve_query_params', array(), $url );
+		if ( has_filter( 'wpcom_legacy_redirector_preserve_query_params' ) ) {
+			$protected_params = apply_filters_deprecated( 'wpcom_legacy_redirector_preserve_query_params', array( array(), $url ), '1.4.0', 'wp_redirect_manager_preserve_query_params');
+		} else {
+			$protected_params = apply_filters( 'wp_redirect_manager_preserve_query_params', array(), $url );
+		}
 		$protected_param_values = array();
 		$param_values = array();
 
@@ -390,7 +398,7 @@ class WPCOM_Legacy_Redirector {
 	 * 
 	 * @param string $excerpt The Excerpt.
 	 */
-	public static function vip_legacy_redirect_check_if_public( $excerpt ) {
+	public static function wp_redirect_manager_check_if_public( $excerpt ) {
 
 		$post_types = get_post_types();
 
@@ -422,7 +430,7 @@ class WPCOM_Legacy_Redirector {
 				$redirect = $excerpt;
 			} elseif ( '/' === $excerpt ) {
 				$redirect = 'valid';
-			} elseif ( 'private' === WPCOM_Legacy_Redirector::vip_legacy_redirect_check_if_public( $excerpt ) ) {
+			} elseif ( 'private' === WP_Redirect_Manager::wp_redirect_manager_check_if_public( $excerpt ) ) {
 				$redirect = 'private';
 			} else {
 				$redirect = home_url() . $excerpt;
@@ -430,7 +438,7 @@ class WPCOM_Legacy_Redirector {
 		} else {
 			// If it's not stored as an Excerpt, it will be stored as a post_parent ID.
 			// Post Parent IDs are always internal redirects.
-			$redirect = self::vip_legacy_redirect_parent_id( $post );
+			$redirect = self::wp_redirect_manager_check_parent_id( $post );
 		}
 		return $redirect;
 	}
@@ -449,7 +457,7 @@ class WPCOM_Legacy_Redirector {
 	 *
 	 * @param object $post The Post.
 	 */
-	public static function vip_legacy_redirect_parent_id( $post ) {
+	public static function wp_redirect_manager_check_parent_id( $post ) {
 		if ( isset( $_POST['redirect_to'] ) && true !== self::check_if_excerpt_is_home( $post ) ) {
 			if ( null !== get_post( $post ) && 'publish' === get_post_status( $post ) ) {
 				return true;
@@ -468,4 +476,4 @@ class WPCOM_Legacy_Redirector {
 	}
 }
 
-WPCOM_Legacy_Redirector::start();
+WP_Redirect_Manager::start();
