@@ -26,6 +26,16 @@ Please contact us before using this plugin.
 
 == Changelog ==
 
+= 1.4.0 =
+* Renamed plugin from WPCOM Legacy Redirector to WP Redirect Manager
+* Addition of user interface for adding and managing redirects
+* Added validation for adding and testing redirects
+* Added `skip-validation` flag for CLI
+
+= 1.3.0 =
+* Cleanup of PHP Notices
+* Addition of wpcom_legacy_redirector_preserve_query_params filter to allow for the whitelisting of params that should be passed through unmodified to the redirected url
+
 = 1.2.0 =
 * Composer support
 * Introduced `wpcom_legacy_redirector_redirect_status` filter for redirect status code  (props spacedmonkey)
