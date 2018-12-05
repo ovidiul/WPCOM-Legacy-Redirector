@@ -458,6 +458,9 @@ class WP_Redirect_Manager {
 	 * @param object $post The Post.
 	 */
 	public static function wp_redirect_manager_check_parent_id( $post ) {
+		if ( defined( 'WP_CLI' ) && WP_CLI && 'publish' === get_post_status( $post ) ) {
+			return true;
+		}
 		if ( isset( $_POST['redirect_to'] ) && true !== self::check_if_excerpt_is_home( $post ) ) {
 			if ( null !== get_post( $post ) && 'publish' === get_post_status( $post ) ) {
 				return true;

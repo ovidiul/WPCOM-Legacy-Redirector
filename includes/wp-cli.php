@@ -65,10 +65,11 @@ class WP_Redirect_Manager_CLI extends WP_CLI_Command {
 	 * Insert a single redirect
 	 *
 	 * @subcommand insert-redirect
-	 * @synopsis <from_url> <to_url>
+	 * @synopsis <from_url> <to_url> [--skip-validation]
 	 */
 	function insert_redirect( $args, $assoc_args ) {
 		$from_url = esc_url_raw( $args[0] );
+		$validate = isset( $assoc_args['skip-validation'] ) ? false : true;
 
 		if ( is_numeric( $args[1] ) ) {
 			$to_url = absint( $args[1] );
@@ -76,7 +77,7 @@ class WP_Redirect_Manager_CLI extends WP_CLI_Command {
 			$to_url = esc_url_raw( $args[1] );
 		}
 
-		$inserted = WP_Redirect_Manager::insert_legacy_redirect( $from_url, $to_url );
+		$inserted = WP_Redirect_Manager::insert_legacy_redirect( $from_url, $to_url, $validate );
 
 		if ( ! $inserted || is_wp_error( $inserted ) ) {
 			WP_CLI::error( sprintf( "Couldn't insert %s -> %s", $from_url, $to_url ) );
