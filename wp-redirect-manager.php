@@ -25,7 +25,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require( __DIR__ . '/includes/wp-cli.php' );
 }
 
-require( __DIR__ . '/includes/class-wpcom-legacy-redirector-ui.php' );
+require( __DIR__ . '/includes/class-wp-redirect-manager-ui.php' );
 
 class WP_Redirect_Manager {
 	const POST_TYPE = 'vip-legacy-redirect';
