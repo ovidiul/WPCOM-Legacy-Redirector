@@ -76,7 +76,7 @@ class WP_Redirect_Manager_CLI extends WP_CLI_Command {
 			$to_url = esc_url_raw( $args[1] );
 		}
 
-		$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $to_url );
+		$inserted = WP_Redirect_Manager::insert_legacy_redirect( $from_url, $to_url );
 
 		if ( ! $inserted || is_wp_error( $inserted ) ) {
 			WP_CLI::error( sprintf( "Couldn't insert %s -> %s", $from_url, $to_url ) );
@@ -257,7 +257,7 @@ class WP_Redirect_Manager_CLI extends WP_CLI_Command {
 					WP_CLI::line( "Processing row $row" );
 				}
 
-				$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to, $validate );
+				$inserted = WP_Redirect_Manager::insert_legacy_redirect( $redirect_from, $redirect_to, $validate );
 				if ( ! $inserted || is_wp_error( $inserted ) ) {
 					$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
 					$notices[] = array(
