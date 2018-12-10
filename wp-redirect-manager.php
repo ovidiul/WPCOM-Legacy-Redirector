@@ -101,9 +101,11 @@ class WP_Redirect_Manager {
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 			$url .= '?' . $_SERVER['QUERY_STRING'];
 		}
-		$request_path = apply_filters_deprecated( 'wpcom_legacy_redirector_request_path', array( $url ), '1.4.0', 'wp_redirect_manager_request_path' );
-		$request_path = apply_filters( 'wp_redirect_manager_request_path', $request_path );
-		
+		if ( has_filter( 'wpcom_legacy_redirector_request_path' ) ) {
+			$request_path = apply_filters_deprecated( 'wpcom_legacy_redirector_request_path', array( $url ), '1.4.0', 'wp_redirect_manager_request_path' );
+		} else {
+			$request_path = apply_filters( 'wp_redirect_manager_request_path', $url );
+		}
 		if ( $request_path ) {
 			$redirect_uri = self::get_redirect_uri( $request_path );
 			if ( $redirect_uri ) {
