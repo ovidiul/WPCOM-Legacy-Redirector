@@ -455,9 +455,6 @@ class WPCOM_Legacy_Redirector {
 				return true;
 			}
 		} else {
-			// Ensure we have a post object.
-			$post = get_post( $post );
-			
 			$parent = get_post( $post->post_parent );
 			if ( null === get_post( $post->post_parent ) ) {
 				return false;
