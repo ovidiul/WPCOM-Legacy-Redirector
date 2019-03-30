@@ -168,7 +168,20 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				}
 
 				if ( false === $dry_run ) {
+					// Set `redirect_to` flag to have the validate URL perform the correct checks.
+					$is_unset = false;
+					if ( ! isset( $_POST['redirect_to'] ) ) {
+						$is_unset = true;
+						$_POST['redirect_to'] = true;
+					}
+
 					$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect->meta_value, $redirect->post_id );
+
+					// Clean up.
+					if ( $is_unset ) {
+						unset( $_POST['redirect_to'] );
+					}
+					
 					if ( ! $inserted || is_wp_error( $inserted ) ) {
 						$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
 						$notices[] = array(
