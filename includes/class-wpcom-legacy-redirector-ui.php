@@ -119,7 +119,7 @@ class WPCOM_Legacy_Redirector_UI {
 							echo ( esc_html( get_permalink( $parent ) ) . '<br /><em>' . esc_html__( 'Warning: Redirect is not a public URL.', 'wpcom-legacy-redirector' ) . '</em>' );
 							break;
 						default:
-							echo esc_html( '/' . WPCOM_Legacy_Redirector::vip_legacy_redirect_parent_id( $post ) );
+							echo esc_html( str_replace( home_url(), '', get_permalink( $parent ) ) );
 					}
 				}
 				break;
