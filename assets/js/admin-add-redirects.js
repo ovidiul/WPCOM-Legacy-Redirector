@@ -1,21 +1,27 @@
 /**
- * Provides helpful preivew of what redirect URLs will look like.
+ * Provides helpful preview of what redirect URLs will look like.
  */
-var fromURL = document.getElementById('from_url');
-var redirectURL = document.getElementById('redirect_to');
+function update_redirect_preview( redirectFieldId, previewHolderId ) {
+    let redirectField = document.getElementById( redirectFieldId );
 
-function redirect_top_label( labelID, inputValue ) {
-    labelID.onkeyup = function() {
-        var prefix = '';
-        var siteURL = WPURLS.siteurl;
-        if ( labelID.value.match(/^\d+$/) && labelID === redirectURL) {
-            var prefix = '?p=';
+    redirectField.onkeyup = function() {
+        let prefix = '';
+        let siteUrl = WPURLS.siteurl;
+
+        // If it just contains an integer, we assume it is a Post ID.
+        if ( redirectField.value.match( /^\d+$/ ) ) {
+            prefix = '?p=';
         }
-        if ( labelID.value.match(/^\http.+/) && labelID === redirectURL) {
-            var prefix, siteURL = '';
+
+        // If it starts with `http`, then we assume it is an absolute URL.
+        if ( redirectField.value.match( /^http.+/ ) ) {
+            prefix  = '';
+            siteUrl = '';
         }
-        document.getElementById(inputValue).innerHTML = siteURL + prefix + labelID.value;
+
+        document.getElementById( previewHolderId ).innerHTML = siteUrl + prefix + redirectField.value;
     }
 }
-redirect_top_label( fromURL, 'from_url_value' );
-redirect_top_label( redirectURL, 'redirect_to_value' );
+
+update_redirect_preview( 'redirect_from', 'redirect_from_preview' );
+update_redirect_preview( 'redirect_to', 'redirect_to_preview' );

@@ -152,7 +152,7 @@ class WPCOM_Legacy_Redirector_UI {
 				// Add the Validate Link
 				$actions = array_merge( $actions, array(
 					'validate' => sprintf( '<a href="%1$s">%2$s</a>',
-						esc_url( $validate_link ), 
+						esc_url( $validate_link ),
 						'Validate'
 					),
 				) );
@@ -164,7 +164,7 @@ class WPCOM_Legacy_Redirector_UI {
 	}
 	/**
 	 * Return error data when validate check fails.
-	 * 
+	 *
 	 * @param string $validate String that passes back the validate result in order to output the right notice.
 	 * @param int $post_id The Post ID.
 	 */
@@ -223,7 +223,7 @@ class WPCOM_Legacy_Redirector_UI {
 		}
 		$errors   = array();
 		$messages = array();
-			if ( isset( $_POST['from_url'] ) && isset( $_POST['redirect_to'] ) ) {
+			if ( isset( $_POST['redirect_from'] ) && isset( $_POST['redirect_to'] ) ) {
 				if (
 					! isset( $_POST['redirect_nonce_field'] )
 					|| ! wp_verify_nonce( $_POST['redirect_nonce_field'], 'add_redirect_nonce' )
@@ -233,12 +233,12 @@ class WPCOM_Legacy_Redirector_UI {
 						'message' => __( 'Sorry, your nonce did not verify.', 'wpcom-legacy-redirector' ),
 					);
 				} else {
-					$from_url	= sanitize_text_field( $_POST['from_url'] );
+					$redirect_from	= sanitize_text_field( $_POST['redirect_from'] );
 					$redirect_to = sanitize_text_field( $_POST['redirect_to'] );
-					if ( WPCOM_Legacy_Redirector::validate( $from_url, $redirect_to ) ) {
-						$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $redirect_to, true );
+					if ( WPCOM_Legacy_Redirector::validate( $redirect_from, $redirect_to ) ) {
+						$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to, true );
 						if ( true === $output ) {
-							$link	   = '<a href="' . esc_url( $from_url ) . '" target="_blank">' . esc_url( $from_url ) . '</a>';
+							$link	   = '<a href="' . esc_url( $redirect_from ) . '" target="_blank">' . esc_url( $redirect_from ) . '</a>';
 							$messages[] = __( 'The redirect was added successfully. Check Redirect: ', 'wpcom-legacy-redirector' ) . $link;
 						} elseif ( is_wp_error( $output ) ) {
 								foreach ( $output->get_error_messages() as $error ) {
@@ -268,20 +268,22 @@ class WPCOM_Legacy_Redirector_UI {
 		$messages = $array[1];
 		?>
 		<style>
-		#from_url_value:not(:empty), #redirect_to_value:not(:empty) {
-			color: #949494;
+		#redirect_from_preview:not(:empty),
+        #redirect_to_preview:not(:empty) {
+			color: #666;
 			float: left;
 			width: 100%;
 			margin-top: -17px;
 		}
 		@media (max-width: 782px) {
-			#from_url_value:not(:empty), #redirect_to_value:not(:empty) {
-				margin-top: 0px;
+			#redirect_from_preview:not(:empty),
+            #redirect_to_preview:not(:empty) {
+				margin-top: 0;
 			}
 		}
 		</style>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?></h1>
+			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php if ( !empty( $messages ) ) : ?>
 				<div class="notice notice-success">
 					<?php foreach ( $messages as $message ) : ?>
@@ -307,8 +309,8 @@ class WPCOM_Legacy_Redirector_UI {
                             <label for="from_url"><?php esc_html_e( 'Redirect From', 'wpcom-legacy-redirector' ); ?></label>
                         </th>
                         <td>
-							<p id="from_url_value"></p>
-                            <input name="from_url" type="text" id="from_url" value="/" class="regular-text">
+							<p id="redirect_from_preview"></p>
+                            <input name="redirect_from" type="text" id="redirect_from" value="/" class="regular-text">
                             <p class="description"><?php esc_html_e( 'This path should be relative to the root, e.g. "/hello".', 'wpcom-legacy-redirector' ); ?></p>
                         </td>
                     </tr>
@@ -317,18 +319,16 @@ class WPCOM_Legacy_Redirector_UI {
                             <label for="redirect_to"><?php esc_html_e( 'Redirect To', 'wpcom-legacy-redirector' ); ?></label>
                         </th>
                         <td>
-							<p id="redirect_to_value"></p>
+							<p id="redirect_to_preview"></p>
                             <input name="redirect_to" type="text" id="redirect_to" value="/" class="regular-text">
-                            <p class="description"><?php esc_html_e( 'To redirect to a post you can use the post_id, e.g. "100".', '' ); ?></p>
+                            <p class="description"><?php esc_html_e( 'To redirect to a post you can use the post_id, e.g. "100".', 'wpcom-legacy-redirector' ); ?></p>
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
-                <p class="submit">
-                    <input type="submit" name="submit" id="submit" class="button button-primary"
-                           value="<?php esc_attr_e( 'Add Redirect', 'wpcom-legacy-redirector' ); ?>">
-                </p>
+                <?php submit_button( __( 'Add Redirect', 'wpcom-legacy-redirector' ) ); ?>
+
             </form>
 
         </div>
