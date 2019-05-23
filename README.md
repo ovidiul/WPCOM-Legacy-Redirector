@@ -16,3 +16,7 @@ Redirects are stored as a custom post type and use the following fields:
 For detailed documentation, please see https://vip.wordpress.com/plugins/wpcom-legacy-redirector/
 
 Please contact us before using this plugin.
+
+## Change Log
+
+See [CHANGELOG.md](CHANGELOG.md) for the full list of changes.
