@@ -256,6 +256,8 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 			WP_CLI::line( 'Processing...' );
 		}
 
+		ini_set('auto_detect_line_endings',TRUE);
+
 		global $wpdb;
 		$row = 0;
 		if ( ( $handle = fopen( $csv, "r" ) ) !== FALSE ) {
