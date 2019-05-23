@@ -6,7 +6,7 @@ function update_redirect_preview( redirectFieldId, previewHolderId ) {
 
 	redirectField.onkeyup = function() {
 		let prefix  = '';
-		let siteUrl = WPURLS.siteurl;
+		let siteUrl = wpcomLegacyRedirector.siteurl;
 
 		// If it just contains an integer, we assume it is a Post ID.
 		if ( redirectField.value.match( /^\d+$/ ) ) {
@@ -19,7 +19,7 @@ function update_redirect_preview( redirectFieldId, previewHolderId ) {
 			siteUrl = '';
 		}
 
-		document.getElementById( previewHolderId ).innerHTML = siteUrl + prefix + redirectField.value;
+		document.getElementById( previewHolderId ).textContent = siteUrl + prefix + redirectField.value;
 	}
 }
 

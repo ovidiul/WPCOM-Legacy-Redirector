@@ -87,19 +87,23 @@ class WPCOM_Legacy_Redirector {
 			}
 		}
 	}
+
 	/**
 	 * Enqueue the JS that builds the link previews.
+	 *
+	 * @since 1.4.0
 	 *
 	 * @param string $hook Get the current page hook.
 	 */
 	public static function wpcom_legacy_add_redirect_js( $hook ) {
-		if ( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
+		if ( 'vip-legacy-redirect_page_wpcom-legacy-redirector' !== $hook ) {
 			return;
 		}
-		wp_enqueue_script( 'admin-add-redirects', plugins_url( '/assets/js/admin-add-redirects.js', __FILE__ ), '', '', true );
-		wp_localize_script( 'admin-add-redirects', 'WPURLS', array( 'siteurl' => get_option( 'siteurl' ) ) );
 
+		wp_enqueue_script( 'wpcom-legacy-redirector', plugins_url( '/../js/admin-add-redirects.js', __FILE__ ), [], WPCOM_LEGACY_REDIRECTOR_VERSION, true );
+		wp_localize_script( 'wpcom-legacy-redirector', 'wpcomLegacyRedirector', array( 'siteurl' => get_option( 'siteurl' ) ) );
 	}
+
 	/**
 	 * @param string $from_url        URL or path that should be redirected; should have leading slash if path.
 	 * @param int|string $redirect_to The post ID or URL to redirect to.
