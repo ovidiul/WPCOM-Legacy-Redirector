@@ -23,6 +23,7 @@
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require __DIR__ . '/includes/wp-cli.php';
+	WP_CLI::add_command( 'wpcom-legacy-redirector', 'WPCOM_Legacy_Redirector_CLI' );
 }
 
 require __DIR__ . '/includes/class-wpcom-legacy-redirector-ui.php';

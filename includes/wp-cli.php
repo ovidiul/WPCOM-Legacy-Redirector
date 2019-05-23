@@ -181,7 +181,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 					if ( $is_unset ) {
 						unset( $_POST['redirect_to'] );
 					}
-					
+
 					if ( ! $inserted || is_wp_error( $inserted ) ) {
 						$failure_message = is_wp_error( $inserted ) ? implode( PHP_EOL, $inserted->get_error_messages() ) : 'Could not insert redirect';
 						$notices[] = array(
@@ -304,5 +304,3 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	}
 
 }
-
-WP_CLI::add_command( 'wpcom-legacy-redirector', 'WPCOM_Legacy_Redirector_CLI' );
