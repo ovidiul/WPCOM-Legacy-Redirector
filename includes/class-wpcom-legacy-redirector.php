@@ -1,14 +1,14 @@
 <?php
 
 class WPCOM_Legacy_Redirector {
-	const POST_TYPE = 'vip-legacy-redirect';
+	const POST_TYPE   = 'vip-legacy-redirect';
 	const CACHE_GROUP = 'vip-legacy-redirect-2';
 
 	static function start() {
 		add_action( 'init', array( __CLASS__, 'init' ) );
-		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability') );
+		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability' ) );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
-		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI, 'admin_menu' ) );
+		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI(), 'admin_menu' ) );
 		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wpcom_legacy_add_redirect_js' ) );
 
 	}
@@ -32,16 +32,16 @@ class WPCOM_Legacy_Redirector {
 		);
 
 		$args = array(
-			'labels'             => $labels,
-			'public'             => true,
-			'rewrite'            => array( 'slug' => 'vip-legacy-redirect' ),
-			'capability_type'    => 'post',
-			'hierarchical'       => false,
-			'menu_position'      => 100,
-			'capabilities'       => array( 'create_posts' => 'do_not_allow' ),
-			'map_meta_cap'       => true,
-			'menu_icon'          => 'dashicons-randomize',
-			'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+			'labels'          => $labels,
+			'public'          => true,
+			'rewrite'         => array( 'slug' => 'vip-legacy-redirect' ),
+			'capability_type' => 'post',
+			'hierarchical'    => false,
+			'menu_position'   => 100,
+			'capabilities'    => array( 'create_posts' => 'do_not_allow' ),
+			'map_meta_cap'    => true,
+			'menu_icon'       => 'dashicons-randomize',
+			'supports'        => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 		);
 		register_post_type( self::POST_TYPE, $args );
 	}
@@ -93,11 +93,11 @@ class WPCOM_Legacy_Redirector {
 	 * @param string $hook Get the current page hook.
 	 */
 	public static function wpcom_legacy_add_redirect_js( $hook ) {
-		if( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
+		if ( $hook !== 'vip-legacy-redirect_page_wpcom-legacy-redirector' ) {
 			return;
 		}
-		wp_enqueue_script( 'admin-add-redirects', plugins_url( '/assets/js/admin-add-redirects.js', __FILE__ ), '' , '', true );
-		wp_localize_script('admin-add-redirects', 'WPURLS', array( 'siteurl' => get_option('siteurl') ));
+		wp_enqueue_script( 'admin-add-redirects', plugins_url( '/assets/js/admin-add-redirects.js', __FILE__ ), '', '', true );
+		wp_localize_script( 'admin-add-redirects', 'WPURLS', array( 'siteurl' => get_option( 'siteurl' ) ) );
 
 	}
 	/**
@@ -122,7 +122,7 @@ class WPCOM_Legacy_Redirector {
 
 		if ( $validate ) {
 			$valid_urls = self::validate_urls( $from_url, $redirect_to );
-			if ( is_object($valid_urls) ) {
+			if ( is_object( $valid_urls ) ) {
 				return $valid_urls;
 			} else {
 				$valid_urls[0] = $from_url;
@@ -131,9 +131,9 @@ class WPCOM_Legacy_Redirector {
 		}
 
 		$args = array(
-			'post_name' => $from_url_hash,
+			'post_name'  => $from_url_hash,
 			'post_title' => $from_url,
-			'post_type' => self::POST_TYPE,
+			'post_type'  => self::POST_TYPE,
 		);
 
 		if ( is_numeric( $redirect_to ) ) {
@@ -202,9 +202,9 @@ class WPCOM_Legacy_Redirector {
 		}
 
 		// White list of Params that should be pass through as is.
-		$protected_params = apply_filters( 'wpcom_legacy_redirector_preserve_query_params', array(), $url );
+		$protected_params       = apply_filters( 'wpcom_legacy_redirector_preserve_query_params', array(), $url );
 		$protected_param_values = array();
-		$param_values = array();
+		$param_values           = array();
 
 		// Parse URL to get Query Params.
 		$query_params = wp_parse_url( $url, PHP_URL_QUERY );
@@ -216,7 +216,7 @@ class WPCOM_Legacy_Redirector {
 			foreach ( $protected_params as $protected_param ) {
 				if ( ! empty( $param_values[ $protected_param ] ) ) {
 					$protected_param_values[ $protected_param ] = $param_values[ $protected_param ];
-					$url = remove_query_arg( $protected_param, $url );
+					$url                                        = remove_query_arg( $protected_param, $url );
 				}
 			}
 		}
@@ -395,7 +395,7 @@ class WPCOM_Legacy_Redirector {
 				$redirect = $excerpt;
 			} elseif ( '/' === $excerpt ) {
 				$redirect = 'valid';
-			} elseif ( 'private' === WPCOM_Legacy_Redirector::vip_legacy_redirect_check_if_public( $excerpt ) ) {
+			} elseif ( 'private' === self::vip_legacy_redirect_check_if_public( $excerpt ) ) {
 				$redirect = 'private';
 			} else {
 				$redirect = home_url() . $excerpt;
