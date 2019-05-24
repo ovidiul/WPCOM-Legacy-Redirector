@@ -308,4 +308,68 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 			}
 		}
 	}
+
+	/**
+	 * Export non-trashed redirects to a CSV file matching the following structure:
+	 *
+	 * redirect_from_path,(redirect_to_post_id|redirect_to_path|redirect_to_url)
+	 *
+	 * @subcommand export-to-csv
+	 * @synopsis --csv=<path-to-csv> [--overwrite]
+	 */
+	public function export_to_csv( $args, $assoc_args ) {
+		$filename  = $assoc_args['csv'] ? $assoc_args['csv'] : false;
+		$overwrite = isset( $assoc_args['overwrite'] ) ? $assoc_args['overwrite'] : false;
+
+		if ( ! $filename ) {
+			WP_CLI::error( 'Invalid CSV file!' );
+		}
+
+		if ( file_exists( $filename ) && ! $overwrite ) {
+			WP_CLI::error( 'CSV file already exists!' );
+		} elseif ( file_exists( $filename ) && $overwrite ) {
+			WP_CLI::warning( 'Overwriting file ' . $filename );
+		}
+
+		$file_descriptor = fopen( $filename, 'wb' );
+
+		if ( ! $file_descriptor ) {
+			WP_CLI::error( 'Invalid CSV filename!' );
+		}
+
+		$posts_per_page = 100;
+		$paged          = 1;
+		$post_count     = array_sum( (array) wp_count_posts( WPCOM_Legacy_Redirector::POST_TYPE ) );
+		$progress       = \WP_CLI\Utils\make_progress_bar( 'Exporting ' . number_format( $post_count ) . ' redirects', $post_count );
+		$output         = array();
+
+		do {
+			$posts = get_posts( array(
+				'posts_per_page'   => $posts_per_page,
+				'paged'            => $paged,
+				'post_type'        => WPCOM_Legacy_Redirector::POST_TYPE,
+				'post_status'      => 'any',
+				'suppress_filters' => 'false',
+			) );
+
+			foreach ( $posts as $post ) {
+				$redirect_from = $post->post_title;
+				$redirect_to   = ( $post->post_parent && $post->post_parent !== 0 ) ? $post->post_parent : $post->post_excerpt;
+				$output[]      = array( $redirect_from, $redirect_to );
+			}
+			$progress->tick( $posts_per_page );
+
+			if ( function_exists( 'stop_the_insanity' ) ) {
+				stop_the_insanity();
+			}
+
+			$paged++;
+
+		} while ( count( $posts ) );
+
+		$progress->finish();
+		WP_CLI\Utils\write_csv( $file_descriptor, $output );
+		fclose( $file_descriptor );
+	}
+
 }
