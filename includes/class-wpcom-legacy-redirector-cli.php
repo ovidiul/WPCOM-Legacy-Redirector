@@ -1,7 +1,6 @@
 <?php
 
 class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
-
 	/**
 	 * Find domains redirected to, useful to populate the allowed_redirect_hosts filter.
 	 *
@@ -257,6 +256,12 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 			WP_CLI::line( 'Processing...' );
 		}
 
+		/*
+		*  Only applicable for the current CLI request to this function call only.
+		*  The configuration option will keep this value during the script's execution, and will be restored at the script's ending.
+		*/
+		ini_set( 'auto_detect_line_endings', true );
+
 		global $wpdb;
 		$row = 0;
 		if ( ( $handle = fopen( $csv, 'r' ) ) !== false ) {
@@ -303,5 +308,4 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 			}
 		}
 	}
-
 }
