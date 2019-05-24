@@ -32,16 +32,17 @@ class WPCOM_Legacy_Redirector {
 		);
 
 		$args = array(
-			'labels'          => $labels,
-			'public'          => true,
-			'rewrite'         => array( 'slug' => 'vip-legacy-redirect' ),
-			'capability_type' => 'post',
-			'hierarchical'    => false,
-			'menu_position'   => 100,
-			'capabilities'    => array( 'create_posts' => 'do_not_allow' ),
-			'map_meta_cap'    => true,
-			'menu_icon'       => 'dashicons-randomize',
-			'supports'        => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+			'labels'              => $labels,
+			'public'              => true,
+			'exclude_from_search' => true,
+			'rewrite'             => array( 'slug' => 'vip-legacy-redirect' ),
+			'capability_type'     => 'post',
+			'hierarchical'        => false,
+			'menu_position'       => 100,
+			'capabilities'        => array( 'create_posts' => 'do_not_allow' ),
+			'map_meta_cap'        => true,
+			'menu_icon'           => 'dashicons-randomize',
+			'supports'            => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 		);
 		register_post_type( self::POST_TYPE, $args );
 	}
