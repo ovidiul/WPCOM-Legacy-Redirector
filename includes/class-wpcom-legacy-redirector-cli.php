@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Manage redirects added via the WPCOM Legacy Redirector plugin.
+ */
 class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 	/**
 	 * Find domains redirected to, useful to populate the allowed_redirect_hosts filter.
