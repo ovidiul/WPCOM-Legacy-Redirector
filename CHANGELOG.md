@@ -11,25 +11,29 @@ Requires PHP 5.6.
 ### Added
 - Admin pages to view, add, delete, and validate redirects. Uses new `manage_redirects` capability. 
 - `wpcom-legacy-redirector find-domains` CLI command. For sites that need to update their allowed_redirect_hosts filter, this command will list all unique domains that are redirected to.
+- `wpcom-legacy-redirector export-to-csv` CLI command. Allows the exporting of non-trashed redirects to a compatible CSV file to be imported into another site or used as a backup or for easier analysis.
 - CI tests for PHP 7.0 and 7.1.
 - Output errors for failed imports of redirects.
 - Progress bar to `import-from-meta` command.
 - `--verbose` flag to `import-from-meta` and `import-from-csv` commands.
 - `--skip-validation` flag, but set validation to true by default.
+- `X-Redirect-By: WPCOM Legacy Redirector` header when used with WP 5.1+.
 
-## Changed
+### Changed
 - Improved adherence to WPCS and VIPCS coding standards.
 - Drop PHP 5.3 support.
 - Use WP_CLI:error to halt operation on failed insert using `insert-redirect`.
 - Return an error if no redirects were found for a meta key.
-- Added performance improvement for `import-from-meta` command.
 - Improved CLI commands documentation.
 - Project / code cleanup.
+- Tightened registered CPT arguments.
 
-## Fixed
+### Fixed
 - Trim whitespace around CSV file path, to support dragging a file into the terminal window to add the path.
 - Ensure `POST` var is set during CLI command.
-
+- Incorrect line-endings leading to broken imports.
+- Redirects appearing in front-end search results.
+- `import-from-meta` batch size check.
 
 ## [1.3.0] - 2016-03-29
 
