@@ -163,6 +163,9 @@ class WPCOM_Legacy_Redirector {
 	 * * @param bool $validate          Validate $from_url and $redirect_to values.
 	 */
 	static function validate_urls( $from_url, $redirect_to ) {
+		if ( false !== self::get_redirect_uri( $from_url ) ) {
+			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
+		}
 		if ( is_numeric( $redirect_to ) || false !== strpos( $redirect_to, 'http' ) ) {
 			if ( is_numeric( $redirect_to ) && true !== self::vip_legacy_redirect_parent_id( $redirect_to ) ) {
 				$message = __( 'Redirect is pointing to a Post ID that does not exist.', 'wpcom-legacy-redirector' );
@@ -173,9 +176,6 @@ class WPCOM_Legacy_Redirector {
 				return new WP_Error( 'external-url-not-allowed', $message );
 			}
 			return array( $from_url, $redirect_to );
-		}
-		if ( false !== self::get_redirect_uri( $from_url ) ) {
-			return new WP_Error( 'duplicate-redirect-uri', 'A redirect for this URI already exists' );
 		}
 		if ( false === self::validate( $from_url, $redirect_to ) ) {
 			$message = __( '"Redirect From" and "Redirect To" values are required and should not match.', 'wpcom-legacy-redirector' );
