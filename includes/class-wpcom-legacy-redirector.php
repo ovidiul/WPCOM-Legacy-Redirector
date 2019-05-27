@@ -355,6 +355,13 @@ class WPCOM_Legacy_Redirector {
 			$response = vip_safe_wp_remote_get( $url );
 		} else {
 			$response = wp_remote_get( $url );
+			// If it was an error, try again with no SSL verification, in case it was a self-signed certificate: https://github.com/Automattic/WPCOM-Legacy-Redirector/issues/64
+			if ( is_wp_error( $response ) ) {
+				$args = [
+					'sslverify' => false,
+				];
+				$response = wp_remote_get( $url, $args );
+			}
 		}
 		$response_code = '';
 		if ( is_array( $response ) ) {
