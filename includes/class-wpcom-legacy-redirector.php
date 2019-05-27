@@ -33,16 +33,20 @@ class WPCOM_Legacy_Redirector {
 
 		$args = array(
 			'labels'              => $labels,
-			'public'              => true,
-			'exclude_from_search' => true,
-			'rewrite'             => array( 'slug' => 'vip-legacy-redirect' ),
+			'public'              => false,
+			'publicly_queryable'  => true,
+			'show_ui'             => true,
+			'rewrite'             => false,
+			'query_var'           => false,
 			'capability_type'     => 'post',
 			'hierarchical'        => false,
 			'menu_position'       => 100,
+			'show_in_nav_menus'   => false,
+			'show_in_rest'        => false,
 			'capabilities'        => array( 'create_posts' => 'do_not_allow' ),
 			'map_meta_cap'        => true,
 			'menu_icon'           => 'dashicons-randomize',
-			'supports'            => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+			'supports'            => [ 'page-attributes' ],
 		);
 		register_post_type( self::POST_TYPE, $args );
 	}
