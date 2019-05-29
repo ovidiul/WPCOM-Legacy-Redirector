@@ -85,7 +85,7 @@ class WPCOM_Legacy_Redirector {
 
 				// Third argument introduced to support the x_redirect_by header to denote WP redirect source.
 				if ( version_compare( get_bloginfo( 'version' ), '5.1.0', '>=' ) ) {
-					wp_safe_redirect( $redirect_uri, $redirect_status, self::POST_TYPE );
+					wp_safe_redirect( $redirect_uri, $redirect_status, WPCOM_LEGACY_REDIRECTOR_PLUGIN_NAME );
 				} else {
 					header( 'X-legacy-redirect: HIT' );
 					wp_safe_redirect( $redirect_uri, $redirect_status );
