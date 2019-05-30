@@ -1,18 +1,27 @@
 <?php
 
+/**
+ * Plugin core functionality for creating, validating, and performing redirect rules.
+ */
 class WPCOM_Legacy_Redirector {
 	const POST_TYPE   = 'vip-legacy-redirect';
 	const CACHE_GROUP = 'vip-legacy-redirect-2';
 
+	/**
+	 * Actions and filters.
+	 */
 	static function start() {
 		add_action( 'init', array( __CLASS__, 'init' ) );
 		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability' ) );
-		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
+		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect.
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI(), 'admin_menu' ) );
 		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wpcom_legacy_add_redirect_js' ) );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE, array( __CLASS__, 'remove_bulk_edit' ) );
 	}
 
+	/**
+	 * Initialize and register the CPT.
+	 */
 	static function init() {
 		$labels = array(
 			'name'                  => _x( 'Redirect Manager', 'Post type general name', 'wpcom-legacy-redirector' ),
@@ -32,24 +41,25 @@ class WPCOM_Legacy_Redirector {
 		);
 
 		$args = array(
-			'labels'              => $labels,
-			'public'              => false,
-			'publicly_queryable'  => true,
-			'show_ui'             => true,
-			'rewrite'             => false,
-			'query_var'           => false,
-			'capability_type'     => 'post',
-			'hierarchical'        => false,
-			'menu_position'       => 100,
-			'show_in_nav_menus'   => false,
-			'show_in_rest'        => false,
-			'capabilities'        => array( 'create_posts' => 'do_not_allow' ),
-			'map_meta_cap'        => true,
-			'menu_icon'           => 'dashicons-randomize',
-			'supports'            => [ 'page-attributes' ],
+			'labels'             => $labels,
+			'public'             => false,
+			'publicly_queryable' => true,
+			'show_ui'            => true,
+			'rewrite'            => false,
+			'query_var'          => false,
+			'capability_type'    => 'post',
+			'hierarchical'       => false,
+			'menu_position'      => 100,
+			'show_in_nav_menus'  => false,
+			'show_in_rest'       => false,
+			'capabilities'       => array( 'create_posts' => 'do_not_allow' ),
+			'map_meta_cap'       => true,
+			'menu_icon'          => 'dashicons-randomize',
+			'supports'           => [ 'page-attributes' ],
 		);
 		register_post_type( self::POST_TYPE, $args );
 	}
+
 	/**
 	 * Register custom role using VIP Helpers with fallbacks.
 	 */
@@ -68,13 +78,19 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	/**
-	 * Remove Bulk Edit from the Bulk Actions drop-down on the CPT's edit screen
+	 * Remove Bulk Edit from the Bulk Actions drop-down on the CPT's edit screen UI.
+	 *
+	 * @param array $actions Current bulk actions available to drop-down.
+	 * @return array Available bulk actions minus edit functionality.
 	 */
 	static function remove_bulk_edit( $actions ) {
 		unset( $actions['edit'] );
 		return $actions;
 	}
 
+	/**
+	 * Performs redirect if current URL is a 404 and redirect rule exists.
+	 */
 	static function maybe_do_redirect() {
 		// Avoid the overhead of running this on every single pageload.
 		// We move the overhead to the 404 page but the trade-off for site performance is worth it.
@@ -125,16 +141,16 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	/**
-	 * @param string $from_url        URL or path that should be redirected; should have leading slash if path.
-	 * @param int|string $redirect_to The post ID or URL to redirect to.
-	 * @param bool $validate          Validate $from_url and $redirect_to values.
+	 * Insert redirect as CPT in the database.
 	 *
-	 * @return bool|string|\WP_Error Error if invalid redirect URL specified or if the URI already has a rule; false if not is_admin, true otherwise.
+	 * @param string     $from_url    URL or path that should be redirected; should have leading slash if path.
+	 * @param int|string $redirect_to The post ID or URL to redirect to.
+	 * @param bool       $validate    Validate $from_url and $redirect_to values.
+	 * @return bool|WP_Error True if inserted; false if not permitted; otherwise error upon validation issue.
 	 */
 	static function insert_legacy_redirect( $from_url, $redirect_to, $validate = true ) {
-
 		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! is_admin() && ! apply_filters( 'wpcom_legacy_redirector_allow_insert', false ) ) {
-			// never run on the front end
+			// Never run on the front end.
 			return false;
 		}
 
@@ -174,12 +190,13 @@ class WPCOM_Legacy_Redirector {
 
 		return true;
 	}
+
 	/**
-	 * Validate the URLs
+	 * Validate the URLs.
 	 *
-	 * @param string $from_url
-	 * @param string $redirect_to
-	 * * @param bool $validate          Validate $from_url and $redirect_to values.
+	 * @param string $from_url    URL to redirect (source).
+	 * @param string $redirect_to URL to redirect to (destination).
+	 * @return array|WP_Error Error if invalid redirect URL specified; returns array of params otherwise.
 	 */
 	static function validate_urls( $from_url, $redirect_to ) {
 		if ( false !== self::get_redirect_uri( $from_url ) ) {
@@ -218,8 +235,14 @@ class WPCOM_Legacy_Redirector {
 		}
 		return array( $from_url, $redirect_to );
 	}
-	static function get_redirect_uri( $url ) {
 
+	/**
+	 * Get Redirect Destination URL.
+	 *
+	 * @param string $url URL to redirect (source).
+	 * @return string|bool Redirect URL if one was found; otherwise false.
+	 */
+	static function get_redirect_uri( $url ) {
 		$url = self::normalise_url( $url );
 		if ( is_wp_error( $url ) ) {
 			return false;
@@ -236,7 +259,7 @@ class WPCOM_Legacy_Redirector {
 
 			// Parse Query String to Associated Array.
 			parse_str( $query_params, $param_values );
-			// For every white listed param save value and strip from url
+			// For every whitelisted param save value and strip from URL.
 			foreach ( $protected_params as $protected_param ) {
 				if ( ! empty( $param_values[ $protected_param ] ) ) {
 					$protected_param_values[ $protected_param ] = $param_values[ $protected_param ];
@@ -257,20 +280,26 @@ class WPCOM_Legacy_Redirector {
 		if ( $redirect_post_id ) {
 			$redirect_post = get_post( $redirect_post_id );
 			if ( ! $redirect_post instanceof WP_Post ) {
-				// If redirect post object doesn't exist, reset cache
+				// If redirect post object doesn't exist, reset cache.
 				wp_cache_set( $url_hash, 0, self::CACHE_GROUP );
 
 				return false;
 			} elseif ( 0 !== $redirect_post->post_parent ) {
 				return add_query_arg( $protected_param_values, get_permalink( $redirect_post->post_parent ) ); // Add Whitelisted Params to the Redirect URL.
 			} elseif ( ! empty( $redirect_post->post_excerpt ) ) {
-				return add_query_arg( $protected_param_values, esc_url_raw( $redirect_post->post_excerpt ) ); // Add Whitelisted Params to the Redirect URL
+				return add_query_arg( $protected_param_values, esc_url_raw( $redirect_post->post_excerpt ) ); // Add Whitelisted Params to the Redirect URL.
 			}
 		}
 
 		return false;
 	}
 
+	/**
+	 * Get Redirect Post ID.
+	 *
+	 * @param string $url URL to redirect (source).
+	 * @return string|int Redirect post ID (as string) if one was found; otherwise 0.
+	 */
 	static function get_redirect_post_id( $url ) {
 		global $wpdb;
 
@@ -285,41 +314,44 @@ class WPCOM_Legacy_Redirector {
 		return $redirect_post_id;
 	}
 
+	/**
+	 * Utility to get MD5 hash of URL.
+	 *
+	 * @param string $url URL to hash.
+	 * @return string Hash representation of string.
+	 */
 	private static function get_url_hash( $url ) {
 		return md5( $url );
 	}
 
 	/**
-	 * Takes a request URL and "normalises" it, stripping common elements
-	 *
+	 * Takes a request URL and "normalises" it, stripping common elements.
 	 * Removes scheme and host from the URL, as redirects should be independent of these.
 	 *
-	 * @param string $url URL to transform
-	 *
-	 * @return string $url Transformed URL
+	 * @param string $url URL to transform.
+	 * @return string|WP_Error Transformed URL; error if validation failed.
 	 */
 	private static function normalise_url( $url ) {
-
-		// Sanitise the URL first rather than trying to normalise a non-URL
+		// Sanitise the URL first rather than trying to normalise a non-URL.
 		$url = esc_url_raw( $url );
 		if ( empty( $url ) ) {
 			return new WP_Error( 'invalid-redirect-url', 'The URL does not validate' );
 		}
 
-		// Break up the URL into it's constituent parts
+		// Break up the URL into it's constituent parts.
 		$components = wp_parse_url( $url );
 
-		// Avoid playing with unexpected data
+		// Avoid playing with unexpected data.
 		if ( ! is_array( $components ) ) {
 			return new WP_Error( 'url-parse-failed', 'The URL could not be parsed' );
 		}
 
-		// We should have at least a path or query
+		// We should have at least a path or query.
 		if ( ! isset( $components['path'] ) && ! isset( $components['query'] ) ) {
 			return new WP_Error( 'url-parse-failed', 'The URL contains neither a path nor query string' );
 		}
 
-		// Make sure $components['query'] is set, to avoid errors
+		// Make sure $components['query'] is set, to avoid errors.
 		$components['query'] = ( isset( $components['query'] ) ) ? $components['query'] : '';
 
 		// All we want is path and query strings
@@ -327,56 +359,60 @@ class WPCOM_Legacy_Redirector {
 		// @todo should we destory the query strings and rebuild with `add_query_arg()`?
 		$normalised_url = $components['path'];
 
-		// Only append '?' and the query if there is one
+		// Only append '?' and the query if there is one.
 		if ( ! empty( $components['query'] ) ) {
 			$normalised_url = $components['path'] . '?' . $components['query'];
 		}
 
 		return $normalised_url;
-
 	}
 
 	/**
-	 * @param $string
+	 * Utility function to lowercase string.
 	 *
-	 * @return string
+	 * @param string $string To apply lowercase.
+	 * @return string Lowercase representation of string.
 	 */
 	public static function lowercase( $string ) {
 		return ! empty( $string ) ? strtolower( $string ) : $string;
 	}
 
 	/**
-	 * @param $url
+	 * Utility function to lowercase, trim, and remove trailing slashes from URL.
+	 * Trailing slashes would not be removed if query string was present.
 	 *
-	 * @return string
+	 * @param string $url URL to be transformed.
+	 * @return string Transformed URL.
 	 */
 	public static function transform( $url ) {
 		return trim( self::lowercase( $url ), '/' );
 	}
 
 	/**
-	 * @param $from_url
-	 * @param $redirect_to
+	 * Check redirect source and destination URL's are different.
 	 *
-	 * @return bool
+	 * @param string $from_url    URL to redirect (source).
+	 * @param string $redirect_to URL to redirect to (destination).
+	 * @return bool True if URL's are different; false if they match or either param is empty.
 	 */
 	public static function validate( $from_url, $redirect_to ) {
 		return ( ! empty( $from_url ) && ! empty( $redirect_to ) && self::transform( $from_url ) !== self::transform( $redirect_to ) );
 	}
+
 	/**
-	 * Check if URL is a 404.
+	 * Get response code to later check if URL is a 404.
 	 *
 	 * @param string $url The URL.
+	 * @return int|string HTTP response code; empty string if no response code.
 	 */
 	public static function check_if_404( $url ) {
-
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
 			$response = vip_safe_wp_remote_get( $url );
 		} else {
 			$response = wp_remote_get( $url );
-			// If it was an error, try again with no SSL verification, in case it was a self-signed certificate: https://github.com/Automattic/WPCOM-Legacy-Redirector/issues/64
+			// If it was an error, try again with no SSL verification, in case it was a self-signed certificate: https://github.com/Automattic/WPCOM-Legacy-Redirector/issues/64.
 			if ( is_wp_error( $response ) ) {
-				$args = [
+				$args     = [
 					'sslverify' => false,
 				];
 				$response = wp_remote_get( $url, $args );
@@ -385,17 +421,17 @@ class WPCOM_Legacy_Redirector {
 		$response_code = '';
 		if ( is_array( $response ) ) {
 			$response_code = wp_remote_retrieve_response_code( $response );
-
 		}
 		return $response_code;
 	}
+
 	/**
 	 * Check if $redirect is a public Post.
 	 *
 	 * @param string $excerpt The Excerpt.
+	 * @return string If post status not published returns 'private'; otherwise 'null'.
 	 */
 	public static function vip_legacy_redirect_check_if_public( $excerpt ) {
-
 		$post_types = get_post_types();
 
 		if ( function_exists( 'wpcom_vip_get_page_by_path' ) ) {
@@ -411,11 +447,13 @@ class WPCOM_Legacy_Redirector {
 			return 'null';
 		}
 	}
+
 	/**
 	 * Get the redirect URL to pass on to validate.
-	 * We look for the excerpt, root, check if private, and check post parent IDs
+	 * We look for the excerpt, root, check if private, and check post parent IDs.
 	 *
-	 * @param array $post The post array.
+	 * @param object $post The Post.
+	 * @return string The redirect URL.
 	 */
 	public static function get_redirect( $post ) {
 		if ( has_excerpt( $post->ID ) ) {
@@ -438,20 +476,24 @@ class WPCOM_Legacy_Redirector {
 		}
 		return $redirect;
 	}
+
 	/**
 	 * Check if the excerpt is the home URL.
 	 *
 	 * @param string $excerpt The Excerpt of a post.
+	 * @return bool True if is home URL matches param.
 	 */
 	public static function check_if_excerpt_is_home( $excerpt ) {
 		if ( '/' === $excerpt || home_url() === $excerpt ) {
 			return true;
 		}
 	}
+
 	/**
 	 * Run checks for the Post Parent ID of the redirect.
 	 *
 	 * @param object $post The Post.
+	 * @return bool|string True on success, false if parent not found, 'private' if not published.
 	 */
 	public static function vip_legacy_redirect_parent_id( $post ) {
 		if ( isset( $_POST['redirect_to'] ) && true !== self::check_if_excerpt_is_home( $post ) ) {
