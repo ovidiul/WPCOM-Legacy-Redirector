@@ -280,6 +280,11 @@ class WPCOM_Legacy_Redirector_UI {
 
 		$errors   = $array[0];
 		$messages = $array[1];
+
+		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification -- Not being saved directly, only used to pre-populate field if there was an error on the last submission.
+		$redirect_from_value = isset( $_POST['redirect_from'], $errors[0] ) ? sanitize_text_field( wp_unslash( $_POST['redirect_from'] ) ) : '/';
+		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification -- Not being saved directly, only used to pre-populate field if there was an error on the last submission.
+		$redirect_to_value   = isset( $_POST['redirect_to'], $errors[0] ) ? sanitize_text_field( wp_unslash( $_POST['redirect_to'] ) ) : '/';
 		?>
 		<style>
 		#redirect_from_preview:not(:empty),
@@ -324,7 +329,7 @@ class WPCOM_Legacy_Redirector_UI {
 						</th>
 						<td>
 							<p id="redirect_from_preview"></p>
-							<input name="redirect_from" type="text" id="redirect_from" value="/" class="regular-text">
+							<input name="redirect_from" type="text" id="redirect_from" value="<?php echo esc_attr( $redirect_from_value ); ?>" class="regular-text">
 							<p class="description"><?php esc_html_e( 'This path should be relative to the root, e.g. "/hello".', 'wpcom-legacy-redirector' ); ?></p>
 						</td>
 					</tr>
@@ -334,7 +339,7 @@ class WPCOM_Legacy_Redirector_UI {
 						</th>
 						<td>
 							<p id="redirect_to_preview"></p>
-							<input name="redirect_to" type="text" id="redirect_to" value="/" class="regular-text">
+							<input name="redirect_to" type="text" id="redirect_to" value="<?php echo esc_attr( $redirect_to_value ); ?>" class="regular-text">
 							<p class="description"><?php esc_html_e( 'To redirect to a post you can use the post_id, e.g. "100".', 'wpcom-legacy-redirector' ); ?></p>
 						</td>
 					</tr>
