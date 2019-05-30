@@ -89,9 +89,16 @@ class WPCOM_Legacy_Redirector {
 		if ( $request_path ) {
 			$redirect_uri = self::get_redirect_uri( $request_path );
 			if ( $redirect_uri ) {
-				header( 'X-legacy-redirect: HIT' );
 				$redirect_status = apply_filters( 'wpcom_legacy_redirector_redirect_status', 301, $url );
-				wp_safe_redirect( $redirect_uri, $redirect_status );
+
+				// Third argument introduced to support the x_redirect_by header to denote WP redirect source.
+				if ( version_compare( get_bloginfo( 'version' ), '5.1.0', '>=' ) ) {
+					wp_safe_redirect( $redirect_uri, $redirect_status, WPCOM_LEGACY_REDIRECTOR_PLUGIN_NAME );
+				} else {
+					header( 'X-legacy-redirect: HIT' );
+					wp_safe_redirect( $redirect_uri, $redirect_status );
+				}
+
 				exit;
 			}
 		}

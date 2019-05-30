@@ -22,6 +22,7 @@
  */
 
 define( 'WPCOM_LEGACY_REDIRECTOR_VERSION', '1.4.0-alpha' );
+define( 'WPCOM_LEGACY_REDIRECTOR_PLUGIN_NAME', 'WPCOM Legacy Redirector' );
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require __DIR__ . '/includes/class-wpcom-legacy-redirector-cli.php';
