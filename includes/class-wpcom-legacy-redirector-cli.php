@@ -209,7 +209,7 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 				}
 			}
 			$offset += 1000;
-		} while ( $total > 1000 && $offset < $end_offset );
+		} while ( $total >= 1000 && $offset < $end_offset );
 
 		$progress->finish();
 
