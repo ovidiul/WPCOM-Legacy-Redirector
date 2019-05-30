@@ -10,7 +10,7 @@ class WPCOM_Legacy_Redirector {
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI(), 'admin_menu' ) );
 		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wpcom_legacy_add_redirect_js' ) );
-
+		add_filter( 'bulk_actions-edit-' . self::POST_TYPE, array( __CLASS__, 'remove_bulk_edit' ) );
 	}
 
 	static function init() {
@@ -61,6 +61,14 @@ class WPCOM_Legacy_Redirector {
 				$role_obj->add_cap( $cap );
 			}
 		}
+	}
+
+	/**
+	 * Remove Bulk Edit from the Bulk Actions drop-down on the CPT's edit screen
+	 */
+	static function remove_bulk_edit( $actions ) {
+		unset( $actions['edit'] );
+		return $actions;
 	}
 
 	static function maybe_do_redirect() {
