@@ -6,6 +6,7 @@ notifications:
     on_failure: change
 
 php:
+  - 7.3
   - 7.4
 
 services:
