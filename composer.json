@@ -18,8 +18,8 @@
     "source": "https://github.com/Automattic/WPCOM-Legacy-Redirector"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7",
     "automattic/vipwpcs": "^2.2",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1"
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+    "phpunit/phpunit": "^7"
   }
 }
