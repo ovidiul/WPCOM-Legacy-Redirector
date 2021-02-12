@@ -21,6 +21,18 @@ Please contact us before using this plugin.
 - PHP 5.6+
 - WordPress 4.5+
 
+## Developement - Getting Started
+
+### Install Dependencies
+```
+composer install
+```
+
+### Run PHPCS
+```
+./vendor/bin/phpcs --standard=WordPress-VIP-Go -sp --basepath=. --ignore=vendor ./
+```
+
 ## Change Log
 
 See [CHANGELOG.md](CHANGELOG.md) for the full list of changes.
