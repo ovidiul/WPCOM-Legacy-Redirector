@@ -33,6 +33,11 @@ composer install
 ./vendor/bin/phpcs --standard=WordPress-VIP-Go -sp --basepath=. --ignore=vendor ./
 ```
 
+### Run XDebug with PHPUnit
+```
+./vendor/bin/phpunit -d xdebug.profiler_enable=on 
+```
+
 ## Change Log
 
 See [CHANGELOG.md](CHANGELOG.md) for the full list of changes.
