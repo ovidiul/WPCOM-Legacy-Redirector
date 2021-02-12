@@ -1,5 +1,4 @@
-{
-  "name": "automattic/wpcom-legacy-redirector",
+{                                                                                                                                                                                                                              "name": "automattic/wpcom-legacy-redirector",
   "type": "wordpress-plugin",
   "description": "WordPress plugin for handling large volumes of legacy redirects in a scalable manner.",
   "homepage": "https://github.com/Automattic/WPCOM-Legacy-Redirector",
@@ -16,5 +15,11 @@
   "support": {
     "issues": "https://github.com/Automattic/WPCOM-Legacy-Redirector/issues",
     "source": "https://github.com/Automattic/WPCOM-Legacy-Redirector"
+  },
+  "require-dev": {
+    "automattic/vipwpcs": "^2.2",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+    "phpunit/phpunit": "^7"
   }
 }
+
