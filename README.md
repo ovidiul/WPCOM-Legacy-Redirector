@@ -25,12 +25,19 @@ Please contact us before using this plugin.
 
 ### Install Dependencies
 ```
-composer install
+npm install
+npm run composer
 ```
 
 ### Run PHPCS
 ```
-./vendor/bin/phpcs --standard=WordPress-VIP-Go -sp --basepath=. --ignore=vendor ./
+npm run phpcs
+```
+
+### Run PHPUnit
+
+```
+npm run test
 ```
 
 ### Run XDebug with PHPUnit
