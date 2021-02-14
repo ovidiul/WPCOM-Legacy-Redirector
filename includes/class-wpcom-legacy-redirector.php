@@ -237,6 +237,61 @@ class WPCOM_Legacy_Redirector {
 	}
 
 	/**
+	 * Get the preservable query string parameters from a given URL.
+	 *
+	 * Does not edit the URL.
+	 *
+	 * @throws \UnexpectedValueException Invalid value from filter.
+	 *
+	 * @param string $url Normalized source URL with or without querystring.
+	 * @return array Associative array of preserved keys and values that were stripped.
+	 */
+	public static function get_preservable_querystring_params_from_url( $url ) {
+		/**
+		 * Filter the list of preservable querystring parameter keys.
+		 *
+		 * The plugin supports providing a list of querystring keys that should be ignored
+		 * when calculating the URL hash. These keys and their values are stripped, the
+		 * redirect lookup is done on the remaining URL, and then the keys and values are appended
+		 * to the destination URL.
+		 *
+		 * Note that if you amend this list after URLs that include the preserved keys have been
+		 * saved to the database, then the redirect lookup will fail for those URLs.
+		 *
+		 * @since 1.3.0
+		 *
+		 * @param string[] $preservable_param_keys Indexed array of strings containing the querystring keys
+		 *                                         that should be preserved on the destination URL.
+		 * @param string   $url                    Normalized source URL.
+		 */
+		$preservable_param_keys = apply_filters( 'wpcom_legacy_redirector_preserve_query_params', array(), $url );
+		
+		if ( ! is_array( $preservable_param_keys ) ) {
+			throw new \UnexpectedValueException( 'wpcom_legacy_redirector_preserve_query_params must return an array.' );
+		}
+		if ( ! empty( $preservable_param_keys ) && array_keys( $preservable_param_keys ) !== range( 0, count( $preservable_param_keys ) - 1 ) ) {
+			throw new \UnexpectedValueException( 'wpcom_legacy_redirector_preserve_query_params must return an indexed array.' );
+		}
+
+		$preserved_param_values = array();
+		$preserved_params       = array();
+
+		// Parse URL to get querystring parameters.
+		$url_query_params = wp_parse_url( $url, PHP_URL_QUERY );
+		
+		// No parameters in URL, so return early.
+		if ( empty( $url_query_params ) ) {
+			return array();
+		}
+
+		// Parse querystring parameters to associative array.
+		parse_str( $url_query_params, $url_params );
+
+		// Extract and return the list of preservable keys (and their values).
+		return array_intersect_key( $url_params, array_flip( $preservable_param_keys ) );
+	}
+
+	/**
 	 * Get Redirect Destination URL.
 	 *
 	 * @param string $url URL to redirect (source).
@@ -248,25 +303,9 @@ class WPCOM_Legacy_Redirector {
 			return false;
 		}
 
-		// Safe list of Params that should be pass through as is.
-		$protected_params       = apply_filters( 'wpcom_legacy_redirector_preserve_query_params', array(), $url );
-		$protected_param_values = array();
-		$param_values           = array();
+		$preservable_params = self::get_preservable_querystring_params_from_url( $url );
 
-		// Parse URL to get Query Params.
-		$query_params = wp_parse_url( $url, PHP_URL_QUERY );
-		if ( ! empty( $query_params ) ) { // Verify Query Params exist.
-
-			// Parse Query String to Associated Array.
-			parse_str( $query_params, $param_values );
-			// For every safelisted param save value and strip from URL.
-			foreach ( $protected_params as $protected_param ) {
-				if ( ! empty( $param_values[ $protected_param ] ) ) {
-					$protected_param_values[ $protected_param ] = $param_values[ $protected_param ];
-					$url                                        = remove_query_arg( $protected_param, $url );
-				}
-			}
-		}
+		$url = remove_query_arg( array_keys( $preservable_params ), $url );
 
 		$url_hash = self::get_url_hash( $url );
 
@@ -285,9 +324,11 @@ class WPCOM_Legacy_Redirector {
 
 				return false;
 			} elseif ( 0 !== $redirect_post->post_parent ) {
-				return add_query_arg( $protected_param_values, get_permalink( $redirect_post->post_parent ) ); // Add Safelisted Params to the Redirect URL.
+				// Add preserved params to the destination URL.
+				return add_query_arg( $preservable_params, get_permalink( $redirect_post->post_parent ) );
 			} elseif ( ! empty( $redirect_post->post_excerpt ) ) {
-				return add_query_arg( $protected_param_values, esc_url_raw( $redirect_post->post_excerpt ) ); // Add Safelisted Params to the Redirect URL.
+				// Add preserved params to the destination URL.
+				return add_query_arg( $preservable_params, esc_url_raw( $redirect_post->post_excerpt ) );
 			}
 		}
 
