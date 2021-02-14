@@ -81,7 +81,11 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 		$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $to_url );
 
 		if ( ! $inserted || is_wp_error( $inserted ) ) {
-			WP_CLI::error( sprintf( "Couldn't insert %s -> %s", $from_url, $to_url ) );
+			$error_text = '';
+			if ( is_wp_error( $inserted ) ) {
+				$error_text = $inserted->get_error_message();
+			}
+			WP_CLI::error( sprintf( "Couldn't insert %s -> %s (%s)", $from_url, $to_url, $error_text ) );
 		}
 
 		WP_CLI::success( sprintf( 'Inserted %s -> %s', $from_url, $to_url ) );
