@@ -165,6 +165,9 @@ class WPCOM_Legacy_Redirector_UI {
 					'validate_vip_legacy_redirect',
 					'_validate_redirect'
 				);
+				
+				// We need to keep here a code legacy for how original urls have been saved in DB.
+				$follow_home_domain = $this->get_home_domain_without_path();
 
 				// Add the Validate Link
 				$actions = array_merge(
@@ -174,6 +177,11 @@ class WPCOM_Legacy_Redirector_UI {
 							'<a href="%1$s">%2$s</a>',
 							esc_url( $validate_link ),
 							'Validate'
+						),
+						'follow' => sprintf(
+							'<a href="%1$s" target="_blank">%2$s</a>',
+							$follow_home_domain . esc_url( $post->post_title ),
+							'Follow'
 						),
 					)
 				);
