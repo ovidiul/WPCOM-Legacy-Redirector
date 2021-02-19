@@ -26,7 +26,7 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 				'/JP納豆',
 				'http://example.com',
 			),
-			
+
 			'redirect_unicode_in_path'  => array(
 				// https://www.w3.org/International/articles/idn-and-iri/
 				'/فوتوغرافيا/?test=فوتوغرافيا',
@@ -49,7 +49,6 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 				'http://example.com',
 			),
 
-			
 		);
 	}
 

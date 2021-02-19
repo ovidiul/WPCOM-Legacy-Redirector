@@ -81,9 +81,9 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 		$inserted = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from_url, $to_url );
 
 		if ( ! $inserted || is_wp_error( $inserted ) ) {
-			$error_text = "";
-			if (  is_wp_error( $inserted ) ) {
-				$error_text =  $inserted->get_error_message();
+			$error_text = '';
+			if ( is_wp_error( $inserted ) ) {
+				$error_text = $inserted->get_error_message();
 			}
 			WP_CLI::error( sprintf( "Couldn't insert %s -> %s (%s)", $from_url, $to_url, $error_text ) );
 		}
@@ -351,13 +351,15 @@ class WPCOM_Legacy_Redirector_CLI extends WP_CLI_Command {
 		$output         = array();
 
 		do {
-			$posts = get_posts( array(
-				'posts_per_page'   => $posts_per_page,
-				'paged'            => $paged,
-				'post_type'        => WPCOM_Legacy_Redirector::POST_TYPE,
-				'post_status'      => 'any',
-				'suppress_filters' => 'false',
-			) );
+			$posts = get_posts(
+				array(
+					'posts_per_page'   => $posts_per_page,
+					'paged'            => $paged,
+					'post_type'        => WPCOM_Legacy_Redirector::POST_TYPE,
+					'post_status'      => 'any',
+					'suppress_filters' => 'false',
+				)
+			);
 
 			foreach ( $posts as $post ) {
 				$redirect_from = $post->post_title;

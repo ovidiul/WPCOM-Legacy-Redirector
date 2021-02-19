@@ -84,7 +84,7 @@ class WPCOM_Legacy_Redirector_UI {
 	 * Provide warnings for possibly bad redirects.
 	 *
 	 * @param string $column The Column for the post_type table.
-	 * @param int $post_id  The Post ID.
+	 * @param int    $post_id  The Post ID.
 	 */
 	public function custom_vip_legacy_redirect_column( $column, $post_id ) {
 		switch ( $column ) {
@@ -128,7 +128,7 @@ class WPCOM_Legacy_Redirector_UI {
 	/**
 	 * Modify the Row Actions for the vip-legacy-redirect post type.
 	 *
-	 * @param array $actions Default Actions.
+	 * @param array  $actions Default Actions.
 	 * @param object $post the current Post.
 	 */
 	public function modify_list_row_actions( $actions, $post ) {
@@ -177,7 +177,7 @@ class WPCOM_Legacy_Redirector_UI {
 	 * Return error data when validate check fails.
 	 *
 	 * @param string $validate String that passes back the validate result in order to output the right notice.
-	 * @param int $post_id The Post ID.
+	 * @param int    $post_id The Post ID.
 	 */
 	public function vip_legacy_redirect_sendback( $validate, $post_id ) {
 		$sendback = remove_query_arg( array( 'validate', 'ids' ), wp_get_referer() );
@@ -284,7 +284,7 @@ class WPCOM_Legacy_Redirector_UI {
 		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification -- Not being saved directly, only used to pre-populate field if there was an error on the last submission.
 		$redirect_from_value = isset( $_POST['redirect_from'], $errors[0] ) ? sanitize_text_field( wp_unslash( $_POST['redirect_from'] ) ) : '/';
 		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification -- Not being saved directly, only used to pre-populate field if there was an error on the last submission.
-		$redirect_to_value   = isset( $_POST['redirect_to'], $errors[0] ) ? sanitize_text_field( wp_unslash( $_POST['redirect_to'] ) ) : '/';
+		$redirect_to_value = isset( $_POST['redirect_to'], $errors[0] ) ? sanitize_text_field( wp_unslash( $_POST['redirect_to'] ) ) : '/';
 		?>
 		<style>
 		#redirect_from_preview:not(:empty),
