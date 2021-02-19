@@ -6,13 +6,13 @@
 class WPCOM_Legacy_Redirector {
 	const POST_TYPE   = 'vip-legacy-redirect';
 	const CACHE_GROUP = 'vip-legacy-redirect-2';
-
+	const VERSION     = '1.4.0';
 	/**
 	 * Actions and filters.
 	 */
 	static function start() {
 		add_action( 'init', array( __CLASS__, 'init' ) );
-		add_action( 'init', array( __CLASS__, 'register_redirect_custom_capability' ) );
+		add_action( 'admin_init', array( __CLASS__, 'register_redirect_custom_capability' ) );
 		add_filter( 'template_redirect', array( __CLASS__, 'maybe_do_redirect' ), 0 ); // hook in early, before the canonical redirect.
 		add_action( 'admin_menu', array( new WPCOM_Legacy_Redirector_UI(), 'admin_menu' ) );
 		add_filter( 'admin_enqueue_scripts', array( __CLASS__, 'wpcom_legacy_add_redirect_js' ) );
@@ -64,6 +64,14 @@ class WPCOM_Legacy_Redirector {
 	 * Register custom role using VIP Helpers with fallbacks.
 	 */
 	static function register_redirect_custom_capability() {
+
+		$plugin_version_key = self::POST_TYPE . '_version';
+
+		// check if this has been run already
+		if ( self::VERSION <= get_option( $plugin_version_key ) ) {
+			return;
+		}
+
 		$cap = apply_filters( 'manage_redirect_capability', 'manage_redirects' );
 		if ( function_exists( 'wpcom_vip_add_role_caps' ) ) {
 			wpcom_vip_add_role_caps( 'administrator', $cap );
@@ -75,6 +83,8 @@ class WPCOM_Legacy_Redirector {
 				$role_obj->add_cap( $cap );
 			}
 		}
+
+		update_option( $plugin_version_key, self::VERSION );
 	}
 
 	/**
