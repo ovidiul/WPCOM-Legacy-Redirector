@@ -67,7 +67,7 @@ class WPCOM_Legacy_Redirector {
 
 		$plugin_version_key = self::POST_TYPE . '_version';
 
-		// check if this has been run already
+		// Check if this has been run already.
 		if ( self::VERSION <= get_option( $plugin_version_key ) ) {
 			return;
 		}
