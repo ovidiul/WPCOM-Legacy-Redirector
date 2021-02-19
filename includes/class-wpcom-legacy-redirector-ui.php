@@ -133,7 +133,12 @@ class WPCOM_Legacy_Redirector_UI {
 	 */
 	private function get_home_domain_without_path() {
 		$home_url_info = WPCOM_Legacy_Redirector::mb_parse_url( home_url() );
-		return $home_url_info['scheme'] . '://' . $home_url_info['host'] . ':' . $home_url_info['port'];
+		$return_url    = $home_url_info['scheme'] . '://' . $home_url_info['host'];
+
+		if( isset($home_url_info['port'] ) && $home_url_info['port'] ) {
+			$return_url .= ':' . $home_url_info['port'];
+		}
+		return $return_url;
 	}
 	/**
 	 * Modify the Row Actions for the vip-legacy-redirect post type.
