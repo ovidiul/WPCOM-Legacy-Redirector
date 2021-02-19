@@ -34,8 +34,6 @@ class RedirectsTest extends TestCase {
 				'http://example.com',
 			),
 
-<<<<<<< HEAD
-=======
 			'redirect_unicode_in_path'  => array(
 				// https://www.w3.org/International/articles/idn-and-iri/
 				'/JP納豆',
@@ -47,7 +45,6 @@ class RedirectsTest extends TestCase {
 				'http://example.com',
 			),
 
->>>>>>> 972f4ee5c0da9d81f98ce975887200b313b1f4b5
 		);
 	}
 
