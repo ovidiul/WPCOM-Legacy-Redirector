@@ -98,7 +98,7 @@ class WPCOM_Legacy_Redirector {
 			return;
 		}
 
-		$url = self::mb_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		$url = self::mb_parse_url( urldecode($_SERVER['REQUEST_URI']), PHP_URL_PATH );
 
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 			$url .= '?' . urldecode( $_SERVER['QUERY_STRING'] );
@@ -137,7 +137,7 @@ class WPCOM_Legacy_Redirector {
 		}
 
 		wp_enqueue_script( 'wpcom-legacy-redirector', plugins_url( '/../js/admin-add-redirects.js', __FILE__ ), [], WPCOM_LEGACY_REDIRECTOR_VERSION, true );
-		wp_localize_script( 'wpcom-legacy-redirector', 'wpcomLegacyRedirector', array( 'siteurl' => get_option( 'siteurl' ) ) );
+		wp_localize_script( 'wpcom-legacy-redirector', 'wpcomLegacyRedirector', array( 'siteurl' => home_url() ) );
 	}
 
 	/**
@@ -158,6 +158,7 @@ class WPCOM_Legacy_Redirector {
 		if ( is_wp_error( $from_url ) ) {
 			return $from_url;
 		}
+
 		$from_url_hash = self::get_url_hash( $from_url );
 
 		if ( $validate ) {
@@ -328,7 +329,14 @@ class WPCOM_Legacy_Redirector {
 				return add_query_arg( $preservable_params, get_permalink( $redirect_post->post_parent ) );
 			} elseif ( ! empty( $redirect_post->post_excerpt ) ) {
 				// Add preserved params to the destination URL.
-				return add_query_arg( $preservable_params, esc_url_raw( $redirect_post->post_excerpt ) );
+				// We need to add here the home_url() if the target starts with.
+				$redirect_url = esc_url_raw( $redirect_post->post_excerpt );
+
+				if ( substr( $redirect_post->post_excerpt, 0, 1 ) === '/' ) {
+					$redirect_url = home_url() . $redirect_url;
+				}
+
+				return add_query_arg( $preservable_params, $redirect_url );
 			}
 		}
 

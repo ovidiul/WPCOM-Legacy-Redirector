@@ -125,6 +125,16 @@ class WPCOM_Legacy_Redirector_UI {
 				break;
 		}
 	}
+
+	/**
+	 * Get WP Home URL without path suffix
+	 *
+	 * @return string
+	 */
+	private function get_home_domain_without_path() {
+		$home_url_info = WPCOM_Legacy_Redirector::mb_parse_url( home_url() );
+		return $home_url_info['scheme'] . '://' . $home_url_info['host'] . ':' . $home_url_info['port'];
+	}
 	/**
 	 * Modify the Row Actions for the vip-legacy-redirect post type.
 	 *
@@ -248,11 +258,20 @@ class WPCOM_Legacy_Redirector_UI {
 				);
 			} else {
 				$redirect_from = sanitize_text_field( $_POST['redirect_from'] );
+				
+				// We apply the home_url() prefix to $redirect_from.
+				$redirect_url_info = WPCOM_Legacy_Redirector::mb_parse_url( home_url() . $redirect_from);
+				$redirect_from = $redirect_url_info['path'];
+				if( isset( $redirect_url_info['query'] ) && $redirect_url_info['query'] ) {
+					$redirect_from .= '?' . $redirect_url_info['query'];
+				}
+				
 				$redirect_to   = sanitize_text_field( $_POST['redirect_to'] );
 				if ( WPCOM_Legacy_Redirector::validate( $redirect_from, $redirect_to ) ) {
 					$output = WPCOM_Legacy_Redirector::insert_legacy_redirect( $redirect_from, $redirect_to, true );
 					if ( true === $output ) {
-						$link       = '<a href="' . esc_url( $redirect_from ) . '" target="_blank">' . esc_url( $redirect_from ) . '</a>';
+						$follow_home_domain = $this->get_home_domain_without_path();
+						$link       = '<a href="' . $follow_home_domain . esc_url( $redirect_from ) . '" target="_blank">' . esc_url( $redirect_from ) . '</a>';
 						$messages[] = __( 'The redirect was added successfully. Check Redirect: ', 'wpcom-legacy-redirector' ) . $link;
 					} elseif ( is_wp_error( $output ) ) {
 						foreach ( $output->get_error_messages() as $error ) {

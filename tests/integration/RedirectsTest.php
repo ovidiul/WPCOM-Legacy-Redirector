@@ -6,6 +6,11 @@ class RedirectsTest extends TestCase {
 
 	public function get_redirect_data() {
 		return array(
+			'redirect_relative_path'  => array(
+				'/non-existing-page',
+				'/test2',
+				home_url() . '/test2',
+			),
 			'redirect_unicode_in_path'  => array(
 				// https://www.w3.org/International/articles/idn-and-iri/
 				'/JP納豆',
@@ -49,14 +54,26 @@ class RedirectsTest extends TestCase {
 	}
 
 	/**
+	 * Test Redirect
+	 *
+	 * @param [type] $from Redirect from relative path.
+	 * @param [type] $to Redirect to url or relative path.
+	 * @param [type] $expected Expected redirected url if relative path was used for $to param.
+	 * @return void
+	 *
 	 * @dataProvider get_redirect_data
 	 */
-	function test_redirect( $from, $to ) {
+	function test_redirect( $from, $to, $expected = null ) {
+
 		$redirect = \WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
 		$this->assertTrue( $redirect, 'insert_legacy_redirect failed' );
 
 		$redirect = \WPCOM_Legacy_Redirector::get_redirect_uri( $from );
-		$this->assertEquals( $redirect, $to, 'get_redirect_uri failed' );
+
+		if ( \is_null( $expected ) ) {
+			$expected = $to;
+		}
+		$this->assertEquals( $redirect, $expected, 'get_redirect_uri failed' );
 	}
 
 
