@@ -1,2 +1,12 @@
+<<<<<<< HEAD
 vendor
 composer.lock
+=======
+/vendor/
+/composer.lock
+/.phpcs.xml
+/phpcs.xml
+/phpunit.xml
+/.phpunit.result.cache
+node_modules
+>>>>>>> bugfix/42-non-ASCII-redirects

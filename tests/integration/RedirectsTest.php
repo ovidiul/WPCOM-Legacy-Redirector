@@ -1,23 +1,8 @@
 <?php
 
-class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
+namespace Automattic\LegacyRedirector\Tests;
 
-	/**
-	 * Makes sure the foundational stuff is sorted so tests work
-	 */
-	function setUp() {
-
-		// We need to trick the plugin into thinking it's run by WP-CLI
-		if ( ! defined( 'WP_CLI' ) ) {
-			define( 'WP_CLI', true );
-		}
-
-		// We need to trick the plugin into thinking we're in admin
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
-
-	}
+class RedirectsTest extends TestCase {
 
 	public function get_redirect_data() {
 		return array(
@@ -26,7 +11,7 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 				'/JP納豆',
 				'http://example.com',
 			),
-			
+
 			'redirect_unicode_in_path'  => array(
 				// https://www.w3.org/International/articles/idn-and-iri/
 				'/فوتوغرافيا/?test=فوتوغرافيا',
@@ -49,7 +34,17 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 				'http://example.com',
 			),
 
-			
+			'redirect_unicode_in_path'  => array(
+				// https://www.w3.org/International/articles/idn-and-iri/
+				'/JP納豆',
+				'http://example.com',
+			),
+			'redirect_unicode_in_path_with_querystring'  => array(
+				// https://www.w3.org/International/articles/idn-and-iri/
+				'/فوتوغرافيا/?test=فوتوغرافيا',
+				'http://example.com',
+			),
+
 		);
 	}
 
@@ -57,10 +52,10 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 	 * @dataProvider get_redirect_data
 	 */
 	function test_redirect( $from, $to ) {
-		$redirect = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
+		$redirect = \WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
 		$this->assertTrue( $redirect, 'insert_legacy_redirect failed' );
 
-		$redirect = WPCOM_Legacy_Redirector::get_redirect_uri( $from );
+		$redirect = \WPCOM_Legacy_Redirector::get_redirect_uri( $from );
 		$this->assertEquals( $redirect, $to, 'get_redirect_uri failed' );
 	}
 
@@ -100,11 +95,17 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 				'/simple-redirectC/?utm_source=XYZ&utm_medium=FALSE&utm_campaign=543',
 				'http://example.com/?utm_source=XYZ&utm_medium=FALSE&utm_campaign=543',
 			),
+			'redirect_unicode_in_path_with_protected_querystring' => array(
+				'/فوتوغرافيا/',
+				'http://example.com',
+				'/فوتوغرافيا/?utm_medium=فوتوغرافيا',
+				'http://example.com?utm_medium=فوتوغرافيا',
+			),
 		);
 	}
 
 	/**
-	 * Verify that whitelisted parameters are maintained on final redirect urls.
+	 * Verify that safelisted parameters are maintained on final redirect urls.
 	 *
 	 * @dataProvider get_protected_redirect_data
 	 */
@@ -122,10 +123,10 @@ class WpcomLegacyRedirectsTest extends WP_UnitTestCase {
 			}
 		);
 
-		$redirect = WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
+		$redirect = \WPCOM_Legacy_Redirector::insert_legacy_redirect( $from, $to, false );
 		$this->assertTrue( $redirect, 'insert_legacy_redirect failed' );
 
-		$redirect = WPCOM_Legacy_Redirector::get_redirect_uri( $protected_from );
+		$redirect = \WPCOM_Legacy_Redirector::get_redirect_uri( $protected_from );
 		$this->assertEquals( $redirect, $protected_to, 'get_redirect_uri failed' );
 	}
 
